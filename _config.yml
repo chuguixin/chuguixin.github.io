@@ -2,10 +2,10 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://chuguixin.github.io
-title: My Octopress Blog
-subtitle: A blogging framework for hackers.
-author: Your Name
+url: http://chuguixin.com
+title: 随心小筑
+subtitle: 随心，当有所为；随缘，当有所不为。
+author: 随心
 simple_search: http://google.com/search
 description:
 
@@ -98,3 +98,6 @@ google_analytics_tracking_id:
 
 # Facebook Like
 facebook_like: false
+
+#weibo
+weibo_share: true
