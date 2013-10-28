@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: 
-
-Sitemap: http://chuguixin.github.io/sitemap.xml 
