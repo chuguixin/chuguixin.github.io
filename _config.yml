@@ -101,3 +101,10 @@ facebook_like: false
 
 #weibo
 weibo_share: true
+
+#comment
+uyan_comment: true
+
+#share
+youyan_comment: false
+
