@@ -7,3 +7,6 @@ categories:
 ---
 
 H1
+```
+var x = 1;
+```
