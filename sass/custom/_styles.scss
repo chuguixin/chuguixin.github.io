@@ -11,20 +11,27 @@ body > header {
     padding: 0;
     margin-top: 1em;
 }
-body > header h1{
+body > header .siteTitle{
     font-family: Microsoft Yahei;
     float: left;
+    text-shadow: 0 0 10px #000;
 }
-body > header h2{
+body > header .siteSubtitle{
     font-family: Microsoft Yahei;
     float: left;
     padding: 25px 0 0 30px;
 }
-body > header span{
+.subtitleItem{
     display: inline-block;
+    text-shadow: 0 0 5px #EEE;
+    -moz-transform-origin:center center;
+    -webkit-transform-origin:center center;
+    -o-transform-origin:center center;
+    -ms-transform-origin:center center;
+    transform-origin:center center;
 }
-body > header span:hover{
-    -webkit-transform:rotateZ(0);
+.subtitleItem:hover{
+    -webkit-transform:rotate(0);
 }
 body > nav{
     border-radius: 0.4em 0.4em 0 0;
