@@ -14,6 +14,8 @@ function(){
     alert(x);
 }
 ```
+{% include_code codeShowDemo.js %}
+
 
 输入中文试一下。。。有没有乱码
 <!--more-->

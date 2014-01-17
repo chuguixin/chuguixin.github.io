@@ -108,3 +108,6 @@ uyan_comment: true
 #share
 youyan_comment: false
 
+#fullScreenBgSlider image
+fullScreenBgSlider: [//sxxz.u.qiniudn.com/fullScreenBG-3.jpg, //sxxz.u.qiniudn.com/fullScreenBG-2.jpg, //sxxz.u.qiniudn.com/fullScreenBG-1.jpg, //sxxz.u.qiniudn.com/fullScreenBG-4.jpg, //sxxz.u.qiniudn.com/fullScreenBG-5.jpg]
+

@@ -33,10 +33,11 @@ body > header .siteSubtitle{
     float: left;
     padding: 25px 0 0 30px;
     height: 27px;
+    color: #CCC;
 }
 .subtitleItem{
     display: inline-block;
-    text-shadow: 0 0 5px #EEE;
+    text-shadow: 1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000;
     -moz-transform-origin:center center;
     -webkit-transform-origin:center center;
     -o-transform-origin:center center;

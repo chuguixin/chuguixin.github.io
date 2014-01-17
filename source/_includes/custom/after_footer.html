@@ -3,11 +3,14 @@
 {% endcomment %}
 <div class="BgSliderWrapper theme-default">
    <div id="fullScreenBgSlider">
-        <img src="http://sxxz.u.qiniudn.com/fullScreenBG-1.jpg" />
+        <!-- <img src="http://sxxz.u.qiniudn.com/fullScreenBG-1.jpg" />
         <img src="http://sxxz.u.qiniudn.com/fullScreenBG-2.jpg" />
         <img src="http://sxxz.u.qiniudn.com/fullScreenBG-3.jpg" />
         <img src="http://sxxz.u.qiniudn.com/fullScreenBG-4.jpg" />
-        <img src="http://sxxz.u.qiniudn.com/fullScreenBG-5.jpg" />
+        <img src="http://sxxz.u.qiniudn.com/fullScreenBG-5.jpg" /> -->
+        {% for url in site.fullScreenBgSlider %}
+            <img src="{{ url }}" />
+        {% endfor %}
     </div> 
 </div>
 

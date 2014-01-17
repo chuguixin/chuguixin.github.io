@@ -44,7 +44,7 @@ $(window).load(function() {
         boxCols: 8, // For box animations
         boxRows: 1, // For box animations
         animSpeed: 500, // Slide transition speed
-        pauseTime: 3000, // How long each slide will show
+        pauseTime: 12000, // How long each slide will show
         startSlide: 0, // Set starting Slide (0 index)
         directionNav: true, // Next & Prev navigation
         controlNav: false, // 1,2,3... navigation
