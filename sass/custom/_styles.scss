@@ -1,5 +1,11 @@
 // This File is imported last, and will override other styles in the cascade
 // Add styles here to make changes without digging in too much
+@font-face {
+    font-family: 'suixinxiaozhu';
+    src: url('http://sxxz.u.qiniudn.com/font-suixinxiaozhu.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
 html{
     //background: url(http://sxxz.u.qiniudn.com/BGbodyBg.jpg) center 0 no-repeat fixed;
 }
@@ -12,7 +18,7 @@ body > header {
     margin-top: 1em;
 }
 body > header .siteTitle{
-    font-family: Microsoft Yahei;
+    font-family:suixinxiaozhu , Microsoft Yahei;
     float: left;
     text-shadow: 0 1px 0 #ccc,
                0 2px 0 #c9c9c9,
@@ -29,7 +35,7 @@ body > header .siteTitle{
     font-weight: bold;
 }
 body > header .siteSubtitle{
-    font-family: Microsoft Yahei;
+    font-family:Microsoft Yahei;
     float: left;
     padding: 25px 0 0 30px;
     height: 27px;
