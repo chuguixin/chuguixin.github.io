@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Examples</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <style type="text/css">
+        h1{
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="text/javascript">
+    if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) { //test for MSIE x.x;
+        var ieversion = new Number(RegExp.$1) // capture x.x portion and store as a number
+        if (ieversion <= 8 && getCookie("visited") == "") {
+            document.write("<h1>Hi! It looks like you're using Internet Explorer " + ieversion + "witch is so “kengdieable”.As a F2E's personal blog,"+baseDomainString()+"no longer supports your IE"+ ieversion +"!</h1>");
+        }else if(ieversion <= 8){
+            document.write("<h1>别闹！你怎么又用这么坑爹的浏览器来访问一个前端程序员的网站，我已经没有耐心用英文装逼给你解释了！</h1>");
+        }
+    }else{
+        document.write("<h1>OH~NO！你的浏览器这么流弊怎么来这儿了！</h1>");
+    }
+
+    function baseDomainString() {
+        e = document.domain.split(/\./);
+        if (e.length > 1) {
+            return (e[e.length - 2] + "." + e[e.length - 1]);
+        } else {
+            return ("");
+        }
+    }
+
+    function setCookie(c_name, value, expiredays) {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + expiredays);
+        document.cookie = c_name + "=" + escape(value) +
+            ((expiredays == null) ? "" : ";expires=" + exdate.toGMTString());
+    }
+
+    function getCookie(c_name) {
+        if (document.cookie.length > 0) {
+            c_start = document.cookie.indexOf(c_name + "=");
+            if (c_start != -1) {
+                c_start = c_start + c_name.length + 1;
+                c_end = document.cookie.indexOf(";", c_start);
+                if (c_end == -1) c_end = document.cookie.length;
+                return unescape(document.cookie.substring(c_start, c_end));
+            }
+        }
+        return "";
+    }
+    </script>
+</body>
+
+</html>
