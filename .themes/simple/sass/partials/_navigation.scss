@@ -1,12 +1,10 @@
 body > nav {
   position: relative;
   background-color: $nav-bg;
-  @include background($nav-bg-front, $nav-bg-back);
   border: {
-    top: 1px solid $nav-border-top;
-    bottom: 1px solid $nav-border-bottom; }
-  padding-top: .35em;
-  padding-bottom: .35em;
+    bottom: 1px solid $nav-border-bottom; 
+  }
+  padding-top: 0 .35em;
   form {
     @include background-clip(padding-box);
     margin: 0; padding: 0;
@@ -37,12 +35,12 @@ body > nav {
   }
   ul { display: none; }
   @media only screen and (min-width: 550px) {
-    font-size: .9em;
+    font-size: 1.2em;
     ul {
       @include horizontal-list(0);
       float: left;
       display: block;
-      padding-top: .15em;
+      padding: .5em 0;
     }
     ul.subscription {
       margin-left: .8em;
@@ -55,12 +53,10 @@ body > nav {
     a {
       @include link-colors($nav-color, $nav-color-hover, $visited: $nav-color);
       font-family: $sans;
-      text-shadow: lighten($nav-bg, 12) 0 1px;
       float: left;
       text-decoration: none;
-      font-size: 1.1em;
-      padding: .1em 0;
-      line-height: 1.5em;
+      font-size: 1.2em;
+      line-height: 1em;
     }
     li + li {
       border-left: 1px solid $nav-border-left;
