@@ -30,8 +30,11 @@ body > nav {
     }
   }
   fieldset[role=search]{ float: right; width: 48%; }
-  fieldset.mobile-nav{ float: left; width: 48%;
-    select{ width: 100%; font-size: .8em; border: 1px solid #888;}
+  fieldset.mobile-nav{ 
+    width: 80%;
+    padding: 5px 0;
+    margin: 0 auto;
+    select{ width: 100%; font-size: 1.4em; border: 1px solid #888;}
   }
   ul { display: none; }
   @media only screen and (min-width: 550px) {

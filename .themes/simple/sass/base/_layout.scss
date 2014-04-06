@@ -84,14 +84,12 @@ body {
   }
   > header {
     font-size: $header-font-size;
-    padding-top: $header-padding-top;
     padding-bottom: $header-padding-bottom;
   }
 }
 
 #content {
   overflow: hidden;
-  > div, > article { width: 100%; }
 }
 
 aside.sidebar {
@@ -100,6 +98,7 @@ aside.sidebar {
   background-color: lighten($sidebar-bg, 2);
   border-top: 1px solid $sidebar-border;
   @extend .group;
+  text-align: center;
 }
 
 .flex-content { max-width: 100%; height: auto; }
@@ -121,11 +120,22 @@ body.sidebar-footer {
   .toggle-sidebar { display: none; }
 }
 
+// 最小的宽度下定义
+#content {
+  > div, > article { width: 86%; }
+}
+
 @media only screen and (min-width: 550px) {
   body > header { font-size: $header-font-size; }
+  #content {
+    > div, > article { width: 80%; }
+  }
 }
 @media only screen and (min-width: 750px) {
   aside.sidebar { @include collapse-sidebar; }
+  #content {
+    > div, > article { width: 80%; }
+  }
 }
 #main, #content, .sidebar {
   @extend .group;
@@ -146,7 +156,7 @@ body.sidebar-footer {
     > div, > article {
       padding-top: $pad-medium/2;
       padding-bottom: $pad-medium/2;
-      //float: left;
+      width: 80%;
     }
   }
   aside.sidebar {
@@ -173,6 +183,7 @@ body.sidebar-footer {
     > div, > article {
       padding-top: $pad-wide/2;
       padding-bottom: $pad-wide/2;
+      width: 61.8%;
     }
   }
   aside.sidebar {
