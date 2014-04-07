@@ -1,11 +1,8 @@
-$noise-bg: none !default;
-$img-border: none !default;
-
 // Main Link Colors
 $link-color: #3EBB96 !default;
-$link-color-hover: lighten($link-color, 3) !default;
-$link-color-visited: darken($link-color, 3) !default;
-$link-color-active: darken($link-color, 6) !default;
+$link-color-hover: lighten($link-color, 2) !default;
+$link-color-visited: darken($link-color, 2) !default;
+$link-color-active: darken($link-color, 4) !default;
 
 // Main Section Colors
 $main-bg: #FFF !default;
@@ -30,7 +27,6 @@ $nav-placeholder: desaturate(darken($nav-bg, 10), 15) !default;
 $nav-border: darken($nav-bg, 16) !default;
 $nav-border-bottom: darken($nav-bg, 16) !default;
 $nav-border-left: darken($nav-bg, 16) !default;
-$nav-border-right: lighten($nav-bg, 16) !default;
 
 /* Sidebar colors */
 $sidebar-bg: #FFF !default;
