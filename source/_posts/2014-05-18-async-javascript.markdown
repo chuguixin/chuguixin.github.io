@@ -17,7 +17,7 @@ categories: JavaScript
 言简意赅的说：异步函数就是会导致将来运行**一个取自事件队列的函数**的函数。这里的重点是“取自事件队列”，关于这个概念，我们暂且按下不表，将在后面进行分析，我们现在只需要知道异步函数是会导致将来某个时刻运行另外一个函数的函数。
 
 ###异步函数 VS 回调函数
-又是一个高频词汇，“回调函数”。在网上的很多文章中都能看到，包括阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/12/asynchronous%EF%BC%BFjavascript.html" target="_blank">Javascript异步编程的4种方法</a>中，都将回调函数作为了异步编程的一个解决方案进行总结。对于此，我认为这种理解是不恰当的，回调函数和异步函数是两个完全不同的东西。
+又是一个高频词汇，“回调函数”。再次，我觉得有必要区分一下回调函数和异步函数的概念，虽然在很多人看来这有点不必要，但是对概念的理解往往是我们深入学习的第一个台阶。
 
 所谓回调函数：In computer programming, a callback is **a piece of executable code that is passed as an argument to other code**, which is expected to call back (execute) the argument at some convenient time. **The invocation may be immediate as in a synchronous callback or it might happen at later time, as in an asynchronous callback.** In all cases, the intention is to specify a function or subroutine as an entity that is, depending on the language, more or less similar to a variable.(from <a href="http://en.wikipedia.org/wiki/Callback_(computer_programming)" target="_blank">wikipedia</a>)
 
@@ -37,6 +37,8 @@ function syncFunc(callbackFunc){
 
 ```
 在上面的代码片段中，setTimeout是一个异步函数，因为它导致了大约1秒后callbackFunc的运行；而callbackFunc对于setTimeout来说，它是一个回调函数。同时，callbackFunc对于syncFunc来说，它也是一个回调函数，但是被同步执行（在同一个事件循环里被执行），那么syncFunc不能被称为异步函数。
+
+另外，在网上的一些文章中都能看到，很多人将回调函数作为了异步编程的一个解决方案进行总结，包括阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/12/asynchronous%EF%BC%BFjavascript.html" target="_blank">Javascript异步编程的4种方法</a>。对于此，我认为这种分类是不太恰当的。如果将回调函数看做异步编程的一种解决方案，那么我们后面讲到的分布式事件、Promise以及强大的工作流控制库都是通过回调函数的形式来实现，岂不是都能看做是同一种解决方案？所以，我认为，回调函数并不是异步编程的一种解决方案。
 
 
 ###JavaScript中的异步机制
@@ -80,7 +82,7 @@ alert(JSON.stringify(obj));
 3.为什么建议将耗时的函数分多次执行？比如，process.nextTick。
 
 ###JavaScript异步编程解决方案
-现在主要的异步编程的方案有三种：1.PubSub模式（分布式事件）；2.Promise/Defered对象；3.工作流控制库。
+现在主要的异步编程的方案有三种：1.PubSub模式（分布式事件）；2.Promise对象；3.工作流控制库。
 下面，我们将逐个进行分析：
 在这些异步方案之前，我们经常能看到所谓的“金字塔厄运”：
 ```javascript
@@ -150,15 +152,72 @@ PubSub.pub = function(event){
 
 PubSub模式是大家最常用的一种方式，相对容易理解。基于这种事件化对象，实现了代码的分层次化，像大名如雷贯耳的Backbone.js也是使用了这样的技术。这是PubSub模式的好处。但是，事件不是万金油，有一些情况不适合用事件来处理，比如一些一次性转化且只有成功或者失败结果的流程，使用PubSub模式就有一些不合适。而这种情景下，Promise就显得更加适合我们。
 
-####Promise/Defered对象
-Promise在很多语言中都有各自的实现，而其与JavaScript的结缘要归功于JavaScript发展历史上有里程碑意义的Dojo框架。2007年Dojo的开发者受MochiKit和Twisted的启发，为Dojo添加了一个dojo.Deferred对象。2009年，Kris Zyp在CommonJS社区提出了[Promise/A规范](http://wiki.commonjs.org/wiki/Promises/A)。之后，风云变幻，nodejs异军突起（2010年初nodejs放弃了对Promise的原生支持），2011年jQuery1.5携带着“叛逆”的Promise实现以及崭新的ajax风火问世，从此Promise真正被JavaScript开发者所熟知。如今，更多的实现早已关注羽翼更加丰满的[Promise/A+规范](http://promisesaplus.com/)，jQuery对Promise的实现也对标准有所妥协，同时像[Q.js](https://github.com/kriskowal/q)的出现也使得JavaScript世界有了通吃客户端和服务器端的直观且纯粹的实现。就在不远的（2014年12月）将来，JavaScript发展史上有一个重大的时刻将会到来，ES6将成为正式标准，在众多夺人眼球的特性中，对[Promise的原生支持](http://people.mozilla.org/~jorendorff/es6-draft.html#sec-operations-on-promise-objects)仍然不乏瞩目，如果再配以[Generator](http://people.mozilla.org/~jorendorff/es6-draft.html#sec-generator-function-definitions)将是如虎添翼。稍远的将来，ES7会提供一个`async`关键字引导声明的函数，支持`await`，而此番花样将会如何让我们拭目以待。
+####Promise对象
+Promise在很多语言中都有各自的实现，而其与JavaScript的结缘要归功于JavaScript发展历史上有里程碑意义的Dojo框架。2007年Dojo的开发者受Twisted的启发，为Dojo添加了一个dojo.Deferred对象。2009年，Kris Zyp在CommonJS社区提出了[Promise/A规范](http://wiki.commonjs.org/wiki/Promises/A)。之后，风云变幻，nodejs异军突起（2010年初nodejs放弃了对Promise的原生支持），2011年jQuery1.5携带着“叛逆”的Promise实现以及崭新的ajax风火问世，从此Promise真正被JavaScript开发者所熟知。如今，更多的实现早已关注羽翼更加丰满的[Promise/A+规范](http://promisesaplus.com/)，jQuery对Promise的实现也对标准有所妥协，同时像[Q.js](https://github.com/kriskowal/q)的出现也使得JavaScript世界有了通吃客户端和服务器端的直观且纯粹的实现。就在不远的（2014年12月）将来，JavaScript发展史上有一个重大的时刻将会到来，ES6将成为正式标准，在众多夺人眼球的特性中，对[Promise的原生支持](http://people.mozilla.org/~jorendorff/es6-draft.html#sec-operations-on-promise-objects)仍然不乏瞩目，如果再配以[Generator](http://people.mozilla.org/~jorendorff/es6-draft.html#sec-generator-function-definitions)将是如虎添翼。稍远的将来，ES7会提供一个`async`关键字引导声明的函数，支持`await`，而此番花样将会如何让我们拭目以待。
 
 废话一大篇，下面是正餐：
 
-相比CommonJS社区简洁的[Promise/A规范](http://wiki.commonjs.org/wiki/Promises/A)，我想我们应该拿[Promise/A+规范](http://promisesaplus.com/)来认识一下Promise比较好。
+CommonJS社区的[Promise/A规范](http://wiki.commonjs.org/wiki/Promises/A)相对简洁，而[Promise/A+规范](http://promisesaplus.com/)规范对其作了一些补充，我们后面将以Promise/A+规范配以实例学习Promise。
 
-Promise是一个对象，它代表异步函数的返回结果。
+什么是Promise？Promise是一个对象，它代表异步函数的返回结果。用代码表示也就是：
+```javascript Promise
+var promise = asyncFunction();
+```
+如果具象一点，我们常见的一个jQuery的ajax调用就是这样：
+```javascript $.ajax with promise
+var ajaxPromise = $.ajax('mydata');
+ajaxPromise.done(successFunction);
+ajaxPromise.fail(errorFunction);
+ajaxPromise.always(completeFunction);
+```
+从上面的代码中，我们看到jQuery返回的Promise对象拥有若干方法，比如`done`、`fail`和`always`分别对应了ajax成功、失败以及无论成功失败都应该执行的回调，这些方法可以看做是规范之上的具体实现带给我们的语法糖。那么，真实的Promise规范是什么样？（其实，规范相对简短，大家可以稍花时间阅读，在此我们做一下主干介绍）
+
 Promise的状态能且只能是下面三种的某一种：`pending`, `fulfilled`, `rejected`。这三种状态之间的关系：<br />
-    *等待（pending）*:可以转变到fulfilled状态或者rejected状态<br />
-    *肯定（fulfilled）*:该 Promise 对应的操作成功了<br />
-    *否定（rejected）*:该 Promise 对应的操作失败了
+    *pending*:可以转变到fulfilled状态或者rejected状态
+    *fulfilled*:不可以转变到其他任何状态，而且必须有一个不可改变的`value`
+    *rejected*:不可以转变到其他任何状态，而且必须有一个不可改变的`reason`
+关于`value`和`reason`，我们可以分别理解为`fulfilled`的结果和`rejected`的原因。
+
+Promise必须要拥有一个`then`方法，用以访问当前或者最终的`value`或`reason`。`then`方法拥有两个参数，而且这两个参数都是可选的，用`promise.then(onFulfilled, onRejected)`分析如下：
+    *onFulfilled*:如果不是函数，将被忽略。
+                  如果是函数，只有且必须在promise状态转换为fulfilled之后被触发一次，并且只传递promise的`value`作为第一个参数。
+    *onRejected*:如果不是函数，将被忽略。
+                 如果是函数，只有且必须在promise状态转换为rejected之后被触发一次，并且只传递promise的`reason`作为第一个参数。
+
+    另外：多次调用then绑定的回调函数，在`fulfilled`或`rejected`的时候，执行顺序与绑定顺序相对应。
+          规范要求，调用需要在`then`之后的event loop中执行。
+
+Promise的`then`方法必须返回一个promise对象，以供链式调用，如果onFulfilled或者onRejected有`throw`，那么后生成的Promise对象应该以抛出内容为`reason`转化为`rejected`状态。
+
+在浅析Promise规范之后，我们可以完善一下本章节的第一段代码：
+```javascript Promise Chain
+var promise = asyncFunction();
+promise = promise.then(onFulfilled1, onRejected1)
+                 .then(onFulfilled2, onRejected2);
+
+promise.then(onFulfilled3, onRejected3);
+```
+
+Promise/A规范的[实现众多](http://promisesaplus.com/implementations)，在我们的实际生产中，我们应该选择哪个实现呢？这个只能说因地制宜。
+比如，当我们在[Q.js](https://github.com/kriskowal/q)和jQuery之间权衡的时候，大家可以在stackoverflow上找到[这种](http://stackoverflow.com/questions/13610741/use-jquery-or-q-js-for-promises)。随手贴个之前发的[weibo](http://weibo.com/1827726421/B02znb4MS?mod=weibotime)。
+
+当然，现在应该有很多人和我一样，期待着ES6的原生Promise实现。ES标准化的Promise看上去是这样的：
+```javascript Promise Chain
+var promise = new Promise(function(resolve, reject) {
+  // do a thing, possibly async, then…
+
+  if (/* everything turned out fine */) {
+    resolve("Stuff worked!");
+  }
+  else {
+    reject(Error("It broke"));
+  }
+});
+
+promise.then(function(result) {
+  console.log(result); // "Stuff worked!"
+}, function(err) {
+  console.log(err); // Error: "It broke"
+});
+```
+如果再配以
