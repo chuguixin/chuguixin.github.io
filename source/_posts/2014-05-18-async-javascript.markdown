@@ -228,7 +228,7 @@ promise.then(function(result) {
 
 ####工作流控制库
 
-所谓的工作流控制库（flow-control），我的理解就是通过固定的模式组织任务（代码/函数）的执行，从而轻松实现并行串行等需求。那么，比如我们有一个需求，需要读取三个文件，而三个文件都是有依赖关系的，那么我们需要做的就是顺序读取，可能代码是这样的：
+所谓的工作流控制库（flow-control），我用自己的语言描述便是通过固有的模式（库提供相关的api）组织任务（代码/函数）的执行，从而轻松实现并行串行等需求。那么，比如我们有一个需求，需要读取三个文件，而三个文件是有顺序依赖关系的，那么我们需要做的就是顺序读取，可能代码原始是这样的：
 ```javascript fs.readFile
 fs.readFile('originalFile',function(err,data1){
   fs.readFile(data1,function(err,data2){
@@ -240,11 +240,60 @@ fs.readFile('originalFile',function(err,data1){
 ```
 我们看到了一个“美丽的”金字塔。那么，如果用久负盛名的[async](https://github.com/caolan/async)后，会是怎么样呢？
 ```javascript async.waterfall
-fs.readFile('originalFile',function(err,data1){
-  fs.readFile(data1,function(err,data2){
-    fs.readFile(data2,function(err,data3){
-      //operate with data3
-    });
-  });
+async.waterfall([
+  function(cb){
+    fs.readFile('originalFile',cb);
+  },function(data1,cb){
+    fs.readFile(data1,cb);
+  },function(data2,cb){
+    fs.readFile(data2,cb);
+  }
+],function(err,result){
+  //result now equals data3 & operate with data3
 });
 ```
+而同样的需求，用极简主义的[step](https://github.com/creationix/step)实现，代码又是如何呢？
+```javascript step
+step(function(){
+  fs.readFile('originalFile',this);
+},function(err,data1){
+  fs.readFile(data1,this);
+},function(err,data2){
+  fs.readFile(data2,this);
+},function(err,data3){
+  //operate with data3
+});
+```
+关于原始方案异步函数嵌套异步函数，我们可以一目了然就不做解释了。下面，我们对比一下async和step两者：
+最明显的区别便是，async对外暴露一个对象，对象之下有实现若干特定流程的api。比如，我们需求中，由上而下有顺序依赖关系，async会给我们提供一个很文艺的api叫`waterfall`,而没有依赖关系只有顺序要求，我们就可以使用`async.series`,并行推进任务可以用`async.parallel`等等。相比async，step就显得简洁很多，step给我们只提供了一个函数，它接受一个系列函数作为参数，并根据函数中对`this`的调用区分实现不同类型的流程控制。上面的示例中，异步函数在完成之后将结果传入step的回调函数执行时的`this`（如你所想，这时候`this`是一个函数）,而正是通过`this`实现了将异步操作的结果传入到下一个step的回调函数，从而实现流程控制。通过`this`，我们实现其它的流程控制，比如要求多个任务并行：
+```javascript step parallel
+Step(function loadStuff() {
+    fs.readFile('file-1', this.parallel());
+    fs.readFile('file-2', this.parallel());
+    fs.readFile('file-3', this.parallel());
+  },function showStuff(err, f1, f2, f3) {
+    //operate with f1, f2, f3
+  }
+);
+```
+另外，async还为我们提供了一些流程控制之外的非常易用集合操作的方法以及一些工具函数。比如，类似于数组的map操作，我们看下面的函数：
+```javascript step parallel
+async.map(['file1','file2','file3'], fs.stat, function(err, results){
+  // results is now an array of stats for each file
+});
+```
+而当我们需要用step实现类似需求的时候怎么办呢？因为step是极简主义，源码也总共寥寥百余行，但是，我们完全可以借助既有的函数和方法，模拟出一个`stepMap`:
+```javascript stepMap
+function stepMap(arr, iterator, callback){
+  step(function(){
+    var group = this.group();
+    for(var i = 0, l = arr.length; i < l; i++){
+      iterator(arr[i], group());
+    }
+  },callback);
+}
+```
+总之，关于这一类型的解决方案，async和step是两个比较大众的实现，哪个更优，我觉得各有利弊，就像我们权衡express和connect一样。如果你喜欢便捷易用，又对api天生敏感，async是不错的选择；如果你像我一样，喜欢简洁，而且喜欢自己折腾，又不想死记api，那不妨尝试一下step。
+
+###结束
+这算是第一次认真写技术博客，没想到写了这么长，或许里面掺杂了太多废话，或许深浅难易没有控制好，或许还有遗憾，比如很像把（Generator在异步编程中的使用透彻分析一下），或许值得庆幸，用文字梳理一遍，自己做到“温故知新”。最后，还请各位看官不吝赐教，烦请斧正。
