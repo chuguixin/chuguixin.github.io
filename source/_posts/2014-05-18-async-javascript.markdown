@@ -38,7 +38,7 @@ function syncFunc(callbackFunc){
 ```
 在上面的代码片段中，setTimeout是一个异步函数，因为它导致了大约1秒后callbackFunc的运行；而callbackFunc对于setTimeout来说，它是一个回调函数。同时，callbackFunc对于syncFunc来说，它也是一个回调函数，但是被同步执行（在同一个事件循环里被执行），那么syncFunc不能被称为异步函数。
 
-另外，在网上的一些文章中都能看到，很多人将回调函数作为了异步编程的一个解决方案进行总结，包括阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/12/asynchronous%EF%BC%BFjavascript.html" target="_blank">Javascript异步编程的4种方法</a>。对于此，我认为这种分类是不太恰当的。如果将回调函数看做异步编程的一种解决方案，那么我们后面讲到的分布式事件、Promise以及强大的工作流控制库都是通过回调函数的形式来实现，岂不是都能看做是同一种解决方案？所以，我认为，回调函数并不是异步编程的一种解决方案。
+另外，在网上的一些文章中都能看到，很多人将回调函数作为了异步编程的一个解决方案进行总结，包括阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/12/asynchronous%EF%BC%BFjavascript.html" target="_blank">Javascript异步编程的4种方法</a>。对于此，我认为这种分类是不太恰当的。如果将回调函数看做异步编程的一种解决方案，那么我们后面讲到的分布式事件、Promise以及强大的工作流控制库都是借助回调函数的形式来实现，岂不是都能看做是同一种解决方案？所以，我认为，回调函数并不是异步编程的一种解决方案。
 
 
 ###JavaScript中的异步机制
@@ -220,4 +220,31 @@ promise.then(function(result) {
   console.log(err); // Error: "It broke"
 });
 ```
-如果再配以
+
+接下来，我们顺带提及一下Generator吧，如果你还不知道Generator是什么？看[这里](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators)。简洁一点描述就是Generator函数可以通过特定的`yield`关键字中断函数执行，并与外界共享执行上下文。Generator函数基于这一特性，可以跟异步函数配合，等待异步函数的执行（结果），然后通过特定的接口（next）将异步结果注入到Generator自己的上下文中，然后继续执行后面的代码。这样结合后，我们便能用同步的方式书写异步代码。能与Generator配合的实现有很多，其中就有Promise对象，而`express`的主人TJ大神给我们提供了一个非常成熟的方案--[co](https://github.com/visionmedia/co)。个人感觉，基于Generator优化异步代码的方式会是未来的最受欢迎的方式。在此，推荐几篇比较优秀的文章，我也就不班门弄斧了。朴灵大大的还热乎的[Generator与异步编程](http://www.infoq.com/cn/articles/generator-and-asynchronous-programming),不知道是哪位老师的[Harmony Generator, yield, ES6, co框架学习](http://bg.biedalian.com/2013/12/21/harmony-generator.html),屈屈大大的[ES6中的生成器函数介绍](https://www.imququ.com/post/generator-function-in-es6.html)。如果想学习这一“不远未来”的技术，请点击进入上述链接吧。
+另外，Google和Mozilla分别给了一些自己的解决方案：[traceur](https://github.com/google/traceur-compiler) 和 [taskjs](http://taskjs.org/)。
+
+基于Promise，我们可以实现各种串行并行的异步操作，但是，这个串行并行的控制，需要我们手动去维护，而flow-control类的方案，恰恰满足了我们这方面的需求，下面我们就从这里说起吧。
+
+####工作流控制库
+
+所谓的工作流控制库（flow-control），我的理解就是通过固定的模式组织任务（代码/函数）的执行，从而轻松实现并行串行等需求。那么，比如我们有一个需求，需要读取三个文件，而三个文件都是有依赖关系的，那么我们需要做的就是顺序读取，可能代码是这样的：
+```javascript fs.readFile
+fs.readFile('originalFile',function(err,data1){
+  fs.readFile(data1,function(err,data2){
+    fs.readFile(data2,function(err,data3){
+      //operate with data3
+    });
+  });
+});
+```
+我们看到了一个“美丽的”金字塔。那么，如果用久负盛名的[async](https://github.com/caolan/async)后，会是怎么样呢？
+```javascript async.waterfall
+fs.readFile('originalFile',function(err,data1){
+  fs.readFile(data1,function(err,data2){
+    fs.readFile(data2,function(err,data3){
+      //operate with data3
+    });
+  });
+});
+```
