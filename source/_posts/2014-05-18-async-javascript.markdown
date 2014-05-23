@@ -7,7 +7,7 @@ categories: JavaScript
 ---
 最近看了一些JavaScript异步编程方面文章，也反复读了几遍薄薄的<a href="http://book.douban.com/subject/24319975/" target="_blank">《Async JavaScript》</a>。总结一下，供自己后续学习使用，并分享给大家。
 
-首先，有几个问题。什么是异步编程/异步函数？异步函数和回调函数有什么关系？为什么异步编程经常与JavaScript同时出现？JavaScript中的异步函数的机制是怎样的？那么现在异步编程有什么解决方案？未来的JavaScript异步编程是什么样子？如果你对上述几个问题已经虽不至“如数家珍”但已是“一目了然”，那么再往下的内容就不适合你。那么，我们开始正餐：
+首先，有几个问题。什么是异步编程/异步函数？异步函数和回调函数有什么关系？为什么异步编程经常与JavaScript同时出现？JavaScript中的异步函数的机制是怎样的？那么现在异步编程有什么解决方案？未来的JavaScript异步编程是什么样子？如果你对上述几个问题已经虽不至“如数家珍”但已是“一目了然”，那么再往下的内容就不适合你了。那么，我们开始吧~
 
 <!--more-->
 
@@ -17,13 +17,13 @@ categories: JavaScript
 言简意赅的说：异步函数就是会导致将来运行**一个取自事件队列的函数**的函数。这里的重点是“取自事件队列”，关于这个概念，我们暂且按下不表，将在后面进行分析，我们现在只需要知道异步函数是会导致将来某个时刻运行另外一个函数的函数。
 
 ###异步函数 VS 回调函数
-又是一个高频词汇，“回调函数”。再次，我觉得有必要区分一下回调函数和异步函数的概念，虽然在很多人看来这有点不必要，但是对概念的理解往往是我们深入学习的第一个台阶。
+又是一个高频词汇，“回调函数”。再次，我觉得有必要区分一下回调函数和异步函数的概念，虽然在很多人看来在这一点上的区分不必太过纠结，可是借用老罗的话，“我不是为了输赢，我就是认真”，对概念的精确理解和把握往往是我们深入学习的第一个台阶。
 
 所谓回调函数：In computer programming, a callback is **a piece of executable code that is passed as an argument to other code**, which is expected to call back (execute) the argument at some convenient time. **The invocation may be immediate as in a synchronous callback or it might happen at later time, as in an asynchronous callback.** In all cases, the intention is to specify a function or subroutine as an entity that is, depending on the language, more or less similar to a variable.(from <a href="http://en.wikipedia.org/wiki/Callback_(computer_programming)" target="_blank">wikipedia</a>)
 
-从wikipedia的说法中我们可以清晰的看到：首先，回调函数是作为参数传入到另外一段代码中的一段可执行代码，也就是它所强调的是回调函数是需要被当做参数传入到其它代码中的；其次，我们看到，回调函数可以是同步的，也可以是异步的，这取决于使用者。如果我们进入到wikipedia的页面，我们能额外发现一些其它的知识，比如回调函数会出现在拥有某些特性的语言中，那么函数是一等公民的JavaScript当然也就完美支持回调函数了。
+从wikipedia的说法中我们可以清晰的看到：首先，回调函数是作为参数传入到另外一段代码中的一段可执行代码，也就是它所强调的是回调函数是需要被当做参数传入到其它代码中的；其次，回调函数可以是同步的，也可以是异步的，这取决于使用者。如果我们进入到wikipedia的页面，我们能额外发现一些其它的知识，比如回调函数会出现在拥有某些特性的语言中，那么函数是一等公民的JavaScript当然也就完美支持回调函数了。
 
-那么，现在这两个概念应该比较清晰了，我们再举个例子，稍微说明。比如：
+那么，现在这两个概念应该比较清晰了，我们举个例子比较一下。比如：
 ```javascript callback VS async function
 function callbackFunc(){
     console.log('callback executed!');
@@ -38,7 +38,7 @@ function syncFunc(callbackFunc){
 ```
 在上面的代码片段中，setTimeout是一个异步函数，因为它导致了大约1秒后callbackFunc的运行；而callbackFunc对于setTimeout来说，它是一个回调函数。同时，callbackFunc对于syncFunc来说，它也是一个回调函数，但是被同步执行（在同一个事件循环里被执行），那么syncFunc不能被称为异步函数。
 
-另外，在网上的一些文章中都能看到，很多人将回调函数作为了异步编程的一个解决方案进行总结，包括阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/12/asynchronous%EF%BC%BFjavascript.html" target="_blank">Javascript异步编程的4种方法</a>。对于此，我认为这种分类是不太恰当的。如果将回调函数看做异步编程的一种解决方案，那么我们后面讲到的分布式事件、Promise以及强大的工作流控制库都是借助回调函数的形式来实现，岂不是都能看做是同一种解决方案？所以，我认为，回调函数并不是异步编程的一种解决方案。
+另外，在网上的一些文章中都能看到，很多人将回调函数作为了异步编程的一个解决方案进行总结，包括阮一峰老师的<a href="http://www.ruanyifeng.com/blog/2012/12/asynchronous%EF%BC%BFjavascript.html" target="_blank">Javascript异步编程的4种方法</a>。对于此，我认为这种分类是不太恰当的。如果将回调函数看做异步编程的一种解决方案，那么我们后面讲到的分布式事件、Promise以及强大的工作流控制库都是借助回调函数的形式来实现，岂不是都能看做是同一种解决方案？所以，我认为，回调函数并不能简单地被当做异步编程的一种解决方案。
 
 
 ###JavaScript中的异步机制
@@ -48,7 +48,7 @@ function syncFunc(callbackFunc){
 
 首先，JavaScript是单线程执行的，但是JavaScript引擎的平台（比如浏览器或者nodejs等）是拥有若干线程的。比如，对于一个浏览器而言，有一条线程做渲染，有一条线程记录事件（比如click等），有一条线程执行JavaScript等等，这些线程在浏览器内核的协调控制下执行（比如，JavaScript线程执行期间，不能进行ui渲染）。这是单线程实现异步的基础。
 
-其次，每一个异步函数都会对应至少一个event-handler，而上文中提到的*事件队列*便是event-handler在被处理的时候存放的地方。JavaScript引擎的线程会在适当的时机处理一系列的event-handler，适当的时机需要满足两个条件：1.该事件已经满足触发条件（比如，setTimeout(func,1000)后大约1000ms）；2.JavaScript的线程空闲。这里需要提到event-loop的存在，它的作用是不断的循环检测事件队列中是否有event-handler，如果有便会取出执行。我们可以这样理解event-loop：
+其次，每一个异步函数都会对应至少一个event-handler，而上文中提到的*事件队列*便是event-handler在被处理的时候存放的地方。JavaScript引擎的线程会在适当的时机处理一系列的event-handler，适当的时机需要满足两个条件：1.该事件已经满足触发条件（比如，setTimeout(func,1000)后大约1000ms）；2.JavaScript的线程空闲（比如，如果setTimeout注册的回调函数延时条件已经满足，但是此时JavaScript引擎正在做一个复杂的for循环耗时3秒，那么setTimeout的回调也只能在上文的for循环执行完成后再去执行）。这里再提到event-loop的存在，每一次循环都是一个tick，它的作用就是不断的循环检测事件队列中是否有event-handler，如果有便会取出执行。我们可以这样理解event-loop：
 ```javascript event-loop
 while(true){
     if(atLeastOneEventIsQueued){
@@ -57,10 +57,10 @@ while(true){
 }
 ```
 
-最后，事件“满足触发条件”（上文中适当的时机的条件1）是如何判断的？不同的事件的“触发条件”可能由不同的线程监控。比如，我们发送一个ajax请求，应该是浏览器新开一个线程发送http请求并在返回的时候通知JavaScript线程满足条件；而click一个button，应该就是浏览器的GUI线程通知JavaScript然后适时执行相应的event-handler。
+最后，事件“满足触发条件”（上文中适当的时机的条件1）是如何判断的？不同的事件的“触发条件”可能由不同的线程监控。比如，我们发送一个ajax请求，应该是浏览器有一个独立的线程发送http请求并在请求返回的时候通知JavaScript引擎线程满足触发条件；而click一个button，应该就是浏览器的GUI线程通知JavaScript引擎然后适时执行相应的event-handler。
 
 
-我们举个例子，假设：我们处于一个页面，这个页面上有一个setTimeout正在执行延时1000ms执行*某段代码*；而在这个200ms的时候，我们点击了一个按钮，因为此时已经满足事件触发条件，且JavaScript线程空闲，所以按照我们的脚本浏览器会立即执行与这个事件绑定的另外*某段代码*；点击事件触发的*某段代码*会做两件事，一件事是注册一个setInterval要求每隔700ms执行*某段代码*；另一件是发送一个ajax请求，并要求请求返回后执行*某段代码*，这个请求会在1500ms后返回。在这之后，可能还会有其它的事件被触发。
+我们举个例子说明，假设：我们处于一个页面，这个页面上有一个setTimeout正在执行延时1000ms执行*某段代码*；而在这个200ms的时候，我们点击了一个按钮，因为此时已经满足事件触发条件，且JavaScript线程空闲，所以按照我们的脚本浏览器会立即执行与这个事件绑定的另外*某段代码*；点击事件触发的*某段代码*会做两件事，一件事是注册一个setInterval要求每隔700ms执行*某段代码*；另一件是发送一个ajax请求，并要求请求返回后执行*某段代码*，这个请求会在1500ms后返回。在这之后，可能还会有其它的事件被触发。
 
 上文中，每一个“*某段代码*”都是一个event-handler，而event-handler被触发的时机可能受前面event-handler的影响。我们按照每个event-handler的执行时间都非常短来处理，可以得到如下图所示（上方标示event-handler对应的异步函数，下方标示大致的时间）：
 
