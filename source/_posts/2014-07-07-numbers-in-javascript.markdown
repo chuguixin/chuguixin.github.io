@@ -3,7 +3,7 @@ layout: post
 title: "Numbers in JavaScript"
 date: 2014-07-07 17:59
 comments: true
-categories: JavaScript 计算机
+categories: JavaScript CS ECMAScript
 ---
 
 Mozilla开发者社区是我学习的重要途径，有一次逛到<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find#Polyfill" target="_blank">这个API</a>看到Polyfill有几行代码：
