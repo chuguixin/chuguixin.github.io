@@ -71,7 +71,7 @@
             vals.num2 = +vals.num2;
             if (isNaN(vals.num1) || isNaN(vals.num1)) {
                 alert('错误输入！');
-                return model.notify();
+                return view.render(model.getVals());
             }
             model.calculate(vals);
             view.render(model.getVals());
