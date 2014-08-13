@@ -6,6 +6,8 @@
     }
 
     mvvm.VM = function(opt) {
+        //m2v用于存储model和view的对应
+        //获取初始化的view和model
         var m2v = this.m2v = {},
             view = this.view = document.querySelector(opt.selector),
             model = this.model = opt.model,
@@ -20,11 +22,13 @@
 
         this.renderDOM(view);
 
+        //处理view的事件，可以触发从view到model的变化
         view.addEventListener('change', function(event) {
             var key = event.target.getAttribute('mvvm-value');
             model[key] = event.target.value;
         }, true);
 
+        //观察model，在修改model的时候，出发model到view方向的变化
         Object.observe(this.model, function(changes) {
             changes.forEach(function(change) {
                 m2v[change.name].forEach(function(warp) {
@@ -45,16 +49,16 @@
     }
 
 
-
+    //功能函数：根据\{\{xxx\}\}和model组成新的字符串
     function formatHtml(tmpl, model) {
-        var splitArray1 = tmpl.split('{{');
+        var splitArray1 = tmpl.split('\{\{');
         if (splitArray1.length < 2) {
             return tmpl;
         }
         var str = '';
         splitArray1.forEach(function(item) {
-            if (item.indexOf('}}') > 0) {
-                var temp = item.split('}}');
+            if (item.indexOf('\}\}') > 0) {
+                var temp = item.split('\}\}');
                 var key = temp[0].trim();
                 str += model[key] + temp[1];
             } else {
@@ -64,14 +68,16 @@
         return str;
     }
 
+    //功能函数：渲染一个node。
+    //我们一般只需要处理nodeType === 3和nodeType === 2的节点，这是数据展示的基本单元
     function renderNode(node, type, owner) {
         var self = this;
         owner = owner ? owner : node;
         if (type == 'new') {
             var key;
             owner.originalTmpl = node.nodeType == 2 ? node.value : node.textContent;
-            owner.originalTmpl.split('{{').forEach(function(item) {
-                item.indexOf('}}') > 0 && (key = item.split('}}')[0]) && (self.m2v[key] || (self.m2v[key] = [])).push(owner);
+            owner.originalTmpl.split('\{\{').forEach(function(item) {
+                item.indexOf('\}\}') > 0 && (key = item.split('\}\}')[0]) && (self.m2v[key] || (self.m2v[key] = [])).push(owner);
             });
             node.value = key;
         }
@@ -82,6 +88,8 @@
         }
     }
 
+    //功能函数：渲染每一个dom元素
+    //同样根据nodeType，做不同的处理
     function renderDOM(dom) {
         for (var i = 0, item; item = dom.attributes[i]; i++) {
             if (item.nodeName.toLowerCase().indexOf('mvvm-value') === 0) {
@@ -96,7 +104,6 @@
             }
         }
     }
-
 
     var vm = mvvm.init({
         model: {

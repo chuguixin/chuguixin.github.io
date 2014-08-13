@@ -3,28 +3,17 @@
     var mvc = {};
 
     mvc.Model = function() {
+        //记录数据
         var num1 = 0,
             num2 = 0,
-            calculateType = '',
             result = 0;
 
-        var observers = [];
-
-        this.calculate = function(vals) {
-            calculateType = vals.calculate;
-            num1 = vals.num1;
-            num2 = vals.num2;
-
-            if (calculateType === 'minus') {
-                result = num1 - num2;
-            } else if (calculateType === 'time') {
-                result = num1 * num2;
-            } else if (calculateType === 'divide') {
-                result = num1 / num2;
-            } else {
-                result = num1 + num2;
-            }
-        };
+        //对外接口
+        this.setVals = function(vals) {
+            num1 = vals.num1,
+            num2 = vals.num2,
+            result = vals.result
+        }
 
         this.getVals = function() {
             return {
@@ -33,6 +22,9 @@
                 result: result
             };
         };
+
+        //观察者模式
+        var observers = [];
 
         this.register = function(observer) {
             observers.push(observer);
@@ -46,11 +38,13 @@
     };
 
     mvc.View = function(controller) {
+        //获取HTML引用
         var num1 = document.querySelector('#J_num1'),
             num2 = document.querySelector('#J_num2'),
             calculate = document.querySelector('#J_calculate'),
             result = document.querySelector('#J_result');
 
+        //传递用户交互给controller
         num1.onchange = num2.onchange = calculate.onchange = function() {
             controller.change({
                 num1: num1.value,
@@ -59,6 +53,7 @@
             });
         };
 
+        //暴露接口给model
         this.render = function(model) {
             var vals = model.getVals();
             result.innerHTML = vals.result;
@@ -70,6 +65,7 @@
     mvc.Controller = function() {
         var model, view;
 
+        //初始化model和view
         this.init = function() {
             model = new mvc.Model;
             view = new mvc.View(this);
@@ -77,14 +73,29 @@
             model.notify();
         };
 
+        //处理用户交互
+        //ps.像model中处理了计算逻辑，我认为，input的合法性检验是可以被model和controller任何一个接受的
+        //业务逻辑
         this.change = function(vals) {
-            vals.num1 = +vals.num1;
-            vals.num2 = +vals.num2;
+            var calculateType = vals.calculate,
+                num1 = vals.num1 = +vals.num1,
+                num2 = vals.num2 = +vals.num2;
             if (isNaN(vals.num1) || isNaN(vals.num1)) {
                 alert('错误输入！');
                 return model.notify();
             }
-            model.calculate(vals);
+
+            if (calculateType === 'minus') {
+                vals.result = num1 - num2;
+            } else if (calculateType === 'time') {
+                vals.result = num1 * num2;
+            } else if (calculateType === 'divide') {
+                vals.result = num1 / num2;
+            } else {
+                vals.result = num1 + num2;
+            }
+
+            model.setVals(vals);
             model.notify();
         };
     }
