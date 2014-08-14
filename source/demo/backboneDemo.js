@@ -35,6 +35,7 @@
             "change select": "change"
         },
         change: function() {
+            //这一部分应该是controller的责任
             var domCache = this.domCache;
 
             var vals = {},
@@ -61,6 +62,7 @@
         }
     });
 
+    //引导初始化，这时候的view更像是controller
     var view = new View({
         model: new Model
     });

@@ -6,9 +6,9 @@ comments: true
 categories: MVC MVP MVVM Patterns JavaScript
 ---
 
-先说一下本文讨论什么吧。主要讨论一下纯粹的MV\*原理，以及MV\*如何发展跟JavaScript结合，比较这些MV\*与常见Framework。*不*讨论常见的Framework的横向对比。所以，隐约觉得，又是一篇枯燥的长文。
+先说一下本文讨论什么吧。主要讨论一下MV\*的原理，以及MV\*与JavaScript的结合。*不*讨论常见的Framework的横向对比。所以，隐约觉得，又是一篇枯燥的长文。
 
-为什么要写这么一篇文章？一年前正式毕业，成为一个全职的前端选手，了解到JavaScript中的MV\*类的框架，不明觉厉，碍于水平限制一直没有过多了解。近几个月，断断续续用Backbone/Angular/Ractive写过一些小的Demo，使用之后的感觉是仿佛在按照Framework要求的API在拼凑，而对所谓的MV\*的每一部分没有清晰的认识，最终结果是，使用过一段时间后很容易忘记API，忘记API之后它们就成了陌生的框架。当然这个问题与我使用的深度有很大很直接的关系，但同时我认为也与自身缺少对原理直观的认知有关系。所以，花了一些时间学习了一下原理，稍作记录。
+为什么要写这么一篇文章？一年前毕业，正式成为一个全职的前端选手，了解到JavaScript中的MV\*类的框架，不明觉厉，碍于水平限制一直没有过多了解。近几个月，断断续续用Backbone/Angular/Ractive写过一些小的Demo，使用之后的感觉是仿佛在按照Framework要求的API在拼凑，而对所谓的MV\*的每一部分没有清晰的认识，最终结果是，使用过一段时间后很容易忘记API，忘记API之后它们就成了陌生的框架。当然这个问题与我使用的深度有很大很直接的关系，但同时我认为也与自身缺少对原理的认知有关系。所以，花了一些时间学习了一下原理，稍作记录。
 
 <!-- more -->
 
@@ -32,7 +32,7 @@ categories: MVC MVP MVVM Patterns JavaScript
 
 另外，[这篇论文](http://heim.ifi.uio.no/~trygver/1979/mvc-2/1979-12-MVC.pdf)应该是较早较正式提出了MVC的概念，尝试阅读一下，与wikipedia给出的描述，差异不大。
 
-大师Addy Osmani在他著名的《Learning JavaScript Design Patterns》（本书英文版为开源的，国内有中文翻译版）中也提到对传统的Smalltalk-80 MVC有[如下描述](http://addyosmani.com/resources/essentialjsdesignpatterns/book/#detailmvcmvp)：
+大师Addy Osmani在他著名的《Learning JavaScript Design Patterns》（本书英文版为开源的，国内有中文翻译版）中也对传统的Smalltalk-80 MVC有[如下描述](http://addyosmani.com/resources/essentialjsdesignpatterns/book/#detailmvcmvp)：
 >A Model represented domain-specific data and was ignorant of the user-interface (Views and Controllers). When a model changed, it would inform its observers.
 
 >A View represented the current state of a Model. The Observer pattern was used for letting the View know whenever the Model was updated or modified.
@@ -52,15 +52,15 @@ categories: MVC MVP MVVM Patterns JavaScript
 从上面的描述中，我尝试提取一些对实现代码描述有意义的关键词：
 
 1. model是一个数据对象
-2. view是一个不应该有逻辑的对象
+2. view是一个不应该有逻辑的对象，展示model的状态
 3. controller负责处理用户交互，修改Model
 4. Observer模式，View观察Model
 
-那么落地上代码上，我们要实现一个上面提到的很简单的例子。首先实现一个model，按照我的理解，需要有如下功能：
+那么落到代码上，我们要实现一个上面提到的很简单的例子。首先实现一个model，按照我的理解，需要有如下功能：
 
 1. 记录数据：两个被运算的数字，一个结果
-2. 需要实现观察者模式，在input修改后notify到view
-3. 暴露接口
+2. 需要实现观察者模式，在数据修改后notify
+3. 暴露接口，供view使用
 
 所以，代码应该如下：
 
@@ -150,7 +150,7 @@ mvc.View = function(controller) {
 }
 ```
 
-最后，是controller，相比其它mv\*中的\*，mvc中的controller显得日子好过很多，没有特别繁重的劳作：
+最后，是controller，相比其它mv\*中的\*，mvc中的controller简单一些：
 
 1. 初始化并将view注册到model
 2. 处理view传递过来的用户交互
@@ -240,7 +240,7 @@ controller.init();
 
 >Presenter retrieves data (Model) and formats it for display in the View.
 
-他的个人网站上也有一篇[文章](http://addyosmani.com/blog/understanding-mvc-and-mvp-for-javascript-and-backbone-developers/)，还没有细读，但是应该值得细读一下。
+他的个人网站上也有一篇[文章](http://addyosmani.com/blog/understanding-mvc-and-mvp-for-javascript-and-backbone-developers/)，还没有细读，但是粗略翻阅，描述差异不大。
 
 另外，在SO上也有一个[很棒的回答](http://stackoverflow.com/questions/2056/what-are-mvp-and-mvc-and-what-is-the-difference)。摘录几句：
 
@@ -254,7 +254,7 @@ controller.init();
 
 1. view对model是不了解的，被动的
 2. presenter取代controller，但比controller做的事情要多
-3. presenter持有model，并对model进行
+3. presenter持有model，并使用model的接口
 4. model和view之间不再存在观察者关系
 
 下面，按照我的理解实现一下代码：
@@ -319,14 +319,14 @@ app.View = function() {
     }
 }
 ```
-因为示例的原因，代码的数量上并没有最直观的展示出MVP中view的特点，但是，还是能看出来一些差异，比如对model的无视，对presenter的依赖。
+因为示例的原因，代码的数量上并没有最直观的变化，但是，还是能看出来差异，比如对model的无视，对presenter的依赖。
 
-接下来，实现presenter。它代替了MVC中的controller，并因为对model和view的持有，从而实现了上面model和view的解耦。它要做的事情，有但不仅有：
+接下来，实现presenter。它代替了MVC中的controller，并因为对model和view的持有，从而实现model和view的解耦。它要做的事情，有但不仅有：
 
 1. 对应好view和model的关系，将model数据告诉view
 2. 处理view的用户交互
 3. 在model后，更新view的展示
-4. 业务逻辑
+4. 业务逻辑（这一部分，也可以交由model）
 
 所以，实现的presenter如下：
 
@@ -373,7 +373,7 @@ view.init();
 ```
 最终整合的代码在[这里](http://jser.it/demo/mvp.html)。
 
-在MVP的最后，我尝试总结一下这种模式的优劣。首先，MVP的模式最明显的就是实现了model和view的解耦（当然，我们的实例比较简单，可能带来的收益不够明显），model和view都有所简化，当然，也有一定的不足，当我们把实践范围限定在前端开发的时候很严重的问题依旧是事件依旧来自view层，难免会造成view层产生一些不应该的逻辑。
+在MVP小节的最后，我尝试总结一下这种模式的优劣。首先，MVP的模式最明显的就是实现了model和view的解耦（因为我们的实例比较简单，可能带来的收益不够明显），model和view都有所简化，当然，也有一定的不足，当我们把实践范围限定在前端开发的时候很严重的问题依旧是事件依旧来自view层，难免会造成view层产生一些不应该的逻辑，不够纯粹。
 
 接下来，是MVVM。
 
@@ -414,28 +414,28 @@ view.init();
 2. dirty checking
 3. getters and setters
 
-`wrapper objects`的做法正如其名字那样，需要在我们的纯粹的数据对象上包装一层，实现set/get等方法，然后通过观察者模式，在model发生修改的时候，触发model到view方向的变化。这样的方式，便于我们接受和理解，但是也使我们不能接触到纯粹的数据，每次set也显得不够简洁。在熟悉的框架中，像backbone/ember等都采用了这样方式对object进行封装。
+`wrapper objects`的做法正如其名字那样，需要在我们的纯粹的数据对象上包装一层，实现set/get等方法，然后通过观察者模式，在`model.set`的时候，触发model到view方向的变化。这样的方式，便于我们接受和理解，但是也使我们不能接触到纯粹的数据，每次set也显得不够简洁。在熟悉的框架中，像backbone/ember等都采用了这样方式对object进行封装。
 
 `dirty checking`应该是伴随着AngularJS的流行，被广大JSer了解到，当然其中就有我。大家经常听到的解释便是，Angular会定时轮训model中的value，与之前记录的oldValue进行对比，如果不同就触发model到view方向的变化。但是，通过我之前的尝试，我认为应该是在执行angular提供的特定操作之后，才会去执行check，比如$http响应，ng-event等等。对于此，我还在继续学习中，不误导大家。这种方式，保持了object的原始和纯粹，修改属性也更加简洁，但很容易大家就能想到存在性能问题，虽然各种极限数据表明，不会影响用户体验，用户感受不到这样的性能变化，但是从一个程序员的角度来说，这的确只能是一个优秀的方案，还不完美的方案。
 
 `getters and setters`是使用了ES5引入的set/get的方式，并且与Object.defineProperty结合，在set中添加相关的逻辑。这种做法的好处是，不会实现存在`dirty checking`的性能诟病，同时没有`wrapper objects`使用的繁琐。但是，同样存在问题，我们无法使用这种方式捕捉属性的增/删。也是不够完美的方案。
 
-而我在本文中实现demo的时候，选择了最简单但是最未来的方式——`Object.observe`（这是ES7的api，但是在chrome 36正式版中已经默认开启）。可能有些同学对这个api不太了解，这里有两篇文章以及一个视频，可以深入了解一下。readwrite上的[Why Javascript Developers Should Get Excited About Object.observe()](http://readwrite.com/2014/07/24/object-observe-javascript-api-impact)以及html5rocks上的[Data-binding Revolutions with Object.observe()](http://www.html5rocks.com/en/tutorials/es7/observe/)，jsconf的一个talk：[The future of data-binding is Object.observe()](http://2013.jsconf.eu/speakers/addy-osmani-plight-of-the-butterfly-everything-you-wanted-to-know-about-objectobserve.html)。
+而我在本文中实现demo的时候，选择了最简单但是最未来的方式——`Object.observe`（这是ES7的api，但是在chrome 36正式版中已经默认开启，所以这个MVVM模式的demo也需要在chrome中查看）。可能有些同学对这个api不太了解，这里有两篇文章以及一个视频，是我接触这个api过程中发现得很棒的资料。readwrite上的[Why Javascript Developers Should Get Excited About Object.observe()](http://readwrite.com/2014/07/24/object-observe-javascript-api-impact)以及html5rocks上的[Data-binding Revolutions with Object.observe()](http://www.html5rocks.com/en/tutorials/es7/observe/)，jsconf的一个talk：[The future of data-binding is Object.observe()](http://2013.jsconf.eu/speakers/addy-osmani-plight-of-the-butterfly-everything-you-wanted-to-know-about-objectobserve.html)。
 
-在用`Object.observe`实现model的时候，我们的model已经可以只是一个简单的object，提供相关的数据即可，所以我们不再展示代码。而view则可以是带有占位符的html文本（当然，可以是html，可以是template，或者什么其它东西）。听说过angular的人就应该很容易理解下面这段html的大概意思。所以我们这么写：
+了解了`Object.observe`之后，在用其实现model的时候，我们便很容易理解model可以只是一个简单的object，提供相关的数据即可，所以model不再需要特别展示代码。而view则可以是带有占位符的html文本（当然，可以是html，可以是template，或者什么其它东西）。听说过angular的人就应该很容易理解下面这段html的大概意思。我们粗糙地这么写吧：
 
 ```html View in MVVM
 <div id="J_mvvmContainer">
-    <input id="J_num1" mvvm-value="\{\{num1\}\}">
-    <select id="J_calculate" mvvm-value="\{\{calculate\}\}">
+    <input id="J_num1" mvvm-value="{% raw %}{{num1}}{% endraw %}">
+    <select id="J_calculate" mvvm-value="{% raw %}{{calculate}}{% endraw %}">
         <option value="plus">+</option>
         <option value="minus">-</option>
         <option value="time">*</option>
         <option value="divide">/</option>
     </select>
-    <input id="J_num2" mvvm-value="\{\{num2\}\}">
+    <input id="J_num2" mvvm-value="{% raw %}{{num2}}{% endraw %}">
     <span>=</span>
-    <span id="J_result">\{\{result\}\}</span>
+    <span id="J_result">{% raw %}{{result}}{% endraw %}</span>
 </div>
 ```
 
@@ -492,16 +492,16 @@ mvvm.VM = function(opt) {
 }
 
 
-//功能函数：根据\{\{xxx\}\}和model组成新的字符串
+//功能函数：根据{% raw %}{{xxx}}{% endraw %}和model组成新的字符串
 function formatHtml(tmpl, model) {
-    var splitArray1 = tmpl.split('\{\{');
+    var splitArray1 = tmpl.split('{ {');
     if (splitArray1.length < 2) {
         return tmpl;
     }
     var str = '';
     splitArray1.forEach(function(item) {
-        if (item.indexOf('\}\}') > 0) {
-            var temp = item.split('\}\}');
+        if (item.indexOf('} }') > 0) {
+            var temp = item.split('}}');
             var key = temp[0].trim();
             str += model[key] + temp[1];
         } else {
@@ -519,8 +519,8 @@ function renderNode(node, type, owner) {
     if (type == 'new') {
         var key;
         owner.originalTmpl = node.nodeType == 2 ? node.value : node.textContent;
-        owner.originalTmpl.split('\{\{').forEach(function(item) {
-            item.indexOf('\}\}') > 0 && (key = item.split('\}\}')[0]) && (self.m2v[key] || (self.m2v[key] = [])).push(owner);
+        owner.originalTmpl.split('{ {').forEach(function(item) {
+            item.indexOf('} }') > 0 && (key = item.split('} }')[0]) && (self.m2v[key] || (self.m2v[key] = [])).push(owner);
         });
         node.value = key;
     }
@@ -568,16 +568,35 @@ var vm = mvvm.init({
 
 同样，我们尝试总结一下MVVM的优劣。总体来说，MVVM解决了大多数我们前面MVC/MVP的问题，view和model很好地做到了解耦，view和model更加纯粹，model更适合面向数据来源（比如ajax请求），开发体验非常棒的双向绑定等等。但是，在我看来，如果说MVVM存在不安因素，那也就是view-model的复杂性。实际生产环境，我们肯定要依赖框架，所以，我们在享受双向绑定等功能的时候，也让我们把对项目的掌控部分地交给了框架，结果是，框架很大程度上决定了代码的性能和拓展（论框架优劣的重要性）。
 
-##MV\* 与 PubSub
 
 
-##Framework
+##Summary
 
-到这里，我已经把我对MV\*的理解和盘托出。但是，我们的实际项目中，必然会选择一款适合的框架。正如一开始所说的那样，我不对它们进行横向比较，首先因为我对这些框架都没有深入使用，个中优劣不敢妄言，其次，在这方面有大量非常优秀的资料，推荐几篇我略读过的：
+到这里，我已经把我对MV\*的理解和盘托出。最后，稍作一点补充/总结。
 
-1. [TodoMVC](http://todomvc.com/)，囊括主流的MV\*框架，介绍特点，帮助选择（又是Addy Osmani领衔的项目）
+####MV\*与PubSub模式
+
+在上文中，我们不断提到并且使用的一种模式是观察者模式，但在JavaScript中，这种传统的模式多被PubSub模式所替代。也因此，在很多文章中，对这两种模式是等同对待的，比如很多人读过的汤姆大叔的[深入理解JavaScript系列（32）：设计模式之观察者模式](http://www.cnblogs.com/TomXu/archive/2012/03/02/2355128.html)。当然，因为两种模式的核心目标都是通知变化，所以这么理解也无可厚非，不过，如果深入一些，我们还是会发现他们之间存在差异。再次提到Addy Osmani的《Learning JavaScript Design Patterns》，他在[The Observer Pattern](http://addyosmani.com/resources/essentialjsdesignpatterns/book/#observerpatternjavascript)章节中也提到了这两种模式的差异。我认为，最主要的差别便是，PubSub模式提供事件通道，通过事件对象传递消息。这样的好处便是，松散耦合，而不必像观察者模式中对象直接获取到其它对象的引用并调用方法。
+
+PubSub模式可以非常顺畅地与JavaScript结合。首先，JavaScript的语言核心ECMAScript的实现，便是事件驱动；其次，作为是一个前端程序员，我们对DOM事件的接受和熟悉程度毋容置疑。也因此，基于这种模式实现的框架或者库，在JavaScript生态系统中，无论是前后端，都比比皆是。而涉及到本文讨论的MV\*，我们肯定会想到[`Backbone.Events`](http://backbonejs.org/#Events)。它是backbone的很关键的一部分，维护了model和view之间的通信，同时又可以暴露给我们使用。后面，我会使用backbone重新实现一下上面的demo。
+
+####Framework
+
+之所以会说到Framework，是因为在实际项目中，我们必然会选择一款适合的框架。正如一开始所说的那样，我不对它们进行横向比较，首先因为我对这些框架都没有深入使用，个中优劣不敢妄言，其次，在这方面有大量非常优秀的资料，推荐几篇我略读过的：
+
+1. [TodoMVC](http://todomvc.com/)，囊括主流的MV\*框架，介绍特点，帮助选择（又是Addy Osmani牵头的项目）
 2. [A Comparison of Angular, Backbone, CanJS and Ember](http://sporto.github.io/blog/2013/04/12/comparison-angular-backbone-can-ember/)：看题目就知道说什么。[译文](http://www.ituring.com.cn/article/38394)
 3. [Rich JavaScript Applications – the Seven Frameworks](http://blog.stevensanderson.com/2012/08/01/rich-javascript-applications-the-seven-frameworks-throne-of-js-2012/)：同样顾名思义。[译文](http://www.ituring.com.cn/article/details/8108)
 4. [开源前端框架纵横谈](http://www.programmer.com.cn/15552/)：科普文，但是科普得很到位。
 
-关于Framework，说起前端MVC，很多人直接的反应就是backbone。但是，按照我们上面对MVC的理解，backbone真的是MVC吗？相信很多人对此都应该清晰了，backbone不能算作是真正的MVC。比如，我粗糙地[用backbone实现一下上面的demo](http://jser.it/demo/backboneDemo.html)，各个部分的区分，已经写到注释中。
+另外，关于Framework，说起前端MVC，很多人直接的反应就是backbone。但是，按照我们上面对MVC的理解，backbone真的是MVC吗？相信很多人对此都应该清晰了，backbone不能算作是真正的MVC。比如，我粗糙地[用backbone实现一下上面的demo](http://jser.it/demo/backboneDemo.html)，为了与上文实例更贴近，没有使用模板，代码中有注释。从代码中可以看出，如果非得说得明明白白，我认为，backbone的model可以是MVC中的model，而backbone的view更像是MVC中view和部分controller，而`Backbone.Router`则是另一部分controller，那么，按照这样理解，backbone的view还像MVP的View+Presenter，所以[Backbone.js Is Not An MVC Framework](http://lostechies.com/derickbailey/2011/12/23/backbone-js-is-not-an-mvc-framework/)，我们只能称之为“The Backbone Way”。如果真的要在JavaScript中寻找MVC，[maria](http://peter.michaux.ca/maria/)应该是一个很棒的选择。
+
+实际项目中，我们到底选用哪一款框架？[TodoMVC](http://todomvc.com/)的角色更像一个列表，提供了很多选择，到底何种场景下适合哪个框架？我相信，只有使用了才能了解。
+
+只有理解了原理，我们才能“不必拘泥于原理”。
+
+####Future
+
+伴随着前端开发复杂性和专业性的增长，我认为一个合适的Framework会真正给前端代码带来变化。无论是老当益壮的Backbone，还是当打之年的angular，再或是意气风发年少清纯（注重UI渲染）的React，乃至初生牛犊后台强硬（web components）的polymer，变数仍在，拭目以待。
+
+从明天开始，选择一个框架，面朝未来，春暖花开。
