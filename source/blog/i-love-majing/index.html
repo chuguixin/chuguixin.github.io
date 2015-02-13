@@ -96,6 +96,11 @@
         background: linear-gradient(#AFEDC8, #9CEADD);
     }
     #section14 {
+        background: -webkit-gradient(linear, top left, bottom left, from(#9CEADD), to(#1ac9aa));
+        background: -webkit-linear-gradient(#9CEADD, #1ac9aa);
+        background: linear-gradient(#9CEADD, #1ac9aa);
+    }
+    #section15 {
         background: #DADFE2;
     }
     </style>
@@ -188,6 +193,12 @@
             </p>
         </div>
         <div class="section" id="section14">
+            <h2 class="title">公元2015年2月14日，凌晨，我想和你说：</h2>
+            <p class="detail">
+                到下一个页去疯狂地单击鼠标吧！
+            </p>
+        </div>
+        <div class="section" id="section15">
             <canvas id="canvas"></canvas>
         </div>
     </div>
@@ -211,6 +222,9 @@ $(document).ready(function() {
             },1000);
         },
         afterLoad: function(anchorLink, index){
+            if(index == 1){
+                return;
+            }
             $('#section'+ (index - 1) +' .detail').show().transit({
                 opacity: 1,
                 delay: 500,
