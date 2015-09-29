@@ -1,0 +1,70 @@
+.archive-main .page-title {
+  position: relative;
+  margin: 0;
+  padding: 40px 0 0 0;
+  text-indent: 120px;
+}
+.archive-main .page-title .time-line-bg .time-line-disc {
+  top: 0;
+  display: none;
+}
+.archive-main .main-content .time-title {
+  position: relative;
+  margin: 0;
+  font-size: 2em;
+  line-height: 1em;
+  padding: .6em 0;
+}
+.archive-main .main-content .time-title .time-title-link {
+  text-decoration: none;
+}
+.archive-main .main-content .time-title .time-title-link:hover + .time-line-bg .time-line-disc {
+  background-color: #3ebb96;
+}
+.archive-main .main-content .article-achive-title {
+  position: relative;
+  font-size: 1.5em;
+  line-height: 1em;
+  padding: .6em 0;
+  margin: 0;
+}
+.archive-main .main-content .article-achive-title .title-link {
+  margin-left: 120px;
+  text-decoration: none;
+  font-weight: normal;
+}
+.archive-main .main-content .article-achive-title .title-link .title-date {
+  font-size: .6em;
+  padding-right: 8px;
+  color: #6a6a6a;
+  transition: color .36s ease;
+}
+.archive-main .main-content .article-achive-title .title-link:hover ~ .time-line-bg .time-line-disc {
+  background-color: #3ebb96;
+}
+.archive-main .main-content .article-achive-title .title-link:hover .title-date {
+  color: #3ebb96;
+}
+.archive-main .time-line-bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 100px;
+  width: 4px;
+  background-color: rgba(214, 214, 214, 0.9);
+  display: table-cell;
+}
+.archive-main .time-line-bg .time-line-disc {
+  position: absolute;
+  top: 50%;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 10px;
+  margin: -6px 0 0 -4px;
+  background-color: rgba(234, 234, 234, 0.9);
+  transition: background-color 0.36s ease;
+}
+.archive-main .is-sticky .time-title-link {
+  z-index: 100;
+}

@@ -1,0 +1,43 @@
+.article-main {
+  padding: 10px 0;
+}
+.article-main .article-title {
+  font-size: 2.2em;
+  line-height: 1.1em;
+  text-align: center;
+  color: #4d4d4d;
+  margin: 1em 0 0 0;
+}
+.article-main .article-meta {
+  padding-bottom: 5px;
+  text-align: center;
+}
+.article-main .article-meta:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.article-main .article-meta .meta-item {
+  padding: 0;
+  font-size: 14px;
+  line-height: 16px;
+  height: 16px;
+  color: #838383;
+  display: inline-block;
+}
+.article-main .article-meta .meta-time {
+  border-right: 1px solid #838383;
+  padding-right: 12px;
+}
+.article-main .article-meta .meta-category {
+  padding-left: 12px;
+}
+.article-main .article-meta .category-link {
+  color: #838383;
+}
+.article-main .article-meta .category-link:hover {
+  color: #3ebb96;
+}
+.article-main .article-content p {
+  text-indent: 1.5em;
+}

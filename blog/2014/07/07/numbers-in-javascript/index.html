@@ -1,0 +1,139 @@
+<!DOCTYPE html><html lang="zh-cmn-Hans"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><title>Numbers in JavaScript</title><link rel="stylesheet" href="/css/layout.css" type="text/css">
+<link rel="stylesheet" href="/css/main.css" type="text/css"><link rel="shortcut icon" href="/img/favicon.png"></head><body><header class="base-menu"><div class="menu-wrapper"><div class="menu-layout-bg"></div><nav class="menu-content"><ul class="menu-list"><li class="menu-item"><a href="/" class="menu-link">随心小筑</a></li><li class="menu-item"><a href="/blog/archives" class="menu-link">Archives</a></li><li class="menu-item"><a href="/blog/about" class="menu-link">About</a></li></ul></nav></div></header><div class="base-content"><div class="base-content-main"><article class="article-main"><h1 class="article-title">Numbers in JavaScript</h1><div class="article-meta"><p class="meta-item meta-time"><span class="meta-item-title">发表于: </span>2014-07-07</p><p class="meta-item meta-category"><span class="meta-item-title">分类于: </span><a href="/blog/categories/基础知识/" target="_blank" class="category-link">基础知识</a></p></div><div class="article-content"><p>Mozilla开发者社区是我学习的重要途径，有一次逛到<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find#Polyfill" target="_blank">这个API</a>看到Polyfill有几行代码：</p>
+<figure class="highlight javascript"><figcaption><span>The Unsigned Right Shift Operator</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> list = <span class="built_in">Object</span>(<span class="keyword">this</span>);</span><br><span class="line"><span class="keyword">var</span> length = list.length &gt;&gt;&gt; <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>由于非CS的某野生专业出身，我对位运算符的了解比较模糊，大概能明白的只是<code>list.length &gt;&gt;&gt; 0</code>对<code>list.length</code>做无符号右移，而返回值是<code>&gt;=0</code>的整数，但背后的运算过程，就不能说得清楚了。复习了一下相关知识，做个笔记。</p>
+<a id="more"></a>
+<h3 id="今天讨论什么？">今天讨论什么？</h3><p>本文，将尝试从现代计算机中对数字的存储和计算讨论起，这也注定，虽然题目叫”Numbers in JavaScript”，但是大量篇幅应该集中在编程语言中主要使用的数字处理的方式。万变不离其宗，懂了原理之后，对掌握各种语言围绕同样原理构建的Number也就轻松多了。当然，这其中就包括JavaScript。</p>
+<p>先想几个问题吧：</p>
+<ol>
+<li>JavaScript的数字为什么有<code>0</code>和<code>-0</code>？</li>
+<li>JavaScript中的<code>NaN</code>为什么互不相等？</li>
+<li>JavaScript中的数字真的只有一种类型吗？</li>
+<li>JavaScript中常被诟病的<code>0.3 - 0.2 == 0.1</code>原因是什么？</li>
+<li>数组的最大长度是多少？为什么是这个值？</li>
+<li>上述问题，只有在JavaScript中有吗？</li>
+</ol>
+<p>当下，计算机如此普及，我相信，即便非程序员也了解：计算机的世界只有0和1。而一个程序员应该了解：0/1组成的东西叫机器码，有原码, 反码, 补码等。而一个JS程序员应该了解：JS中的数字是不分类型的，也就是没有byte/int/float/double等的差异。而一个稍微研究ES规范的JS程序员应该了解：JS的number是IEEE 754标准下64-bits的双精度数值，而且ES中有ToInteger/ToInt32/ToUint32/ToUint16等<code>Type Conversion</code>。下面，我们就尝试着讨论一下这些。</p>
+<p>从硬件的角度上讲，维护两个状态是相对容易的，比如一个二极管的导通或者截止，一个电脉冲的高或者低，从而在实现集成电路时候可以更加简单高效，所以计算机普遍使用0和1来存储和计算。那么，只有0和1，如何表示1234567890呢？这就涉及到<code>机器码</code>和<code>真值</code>。</p>
+<h3 id="机器码和真值">机器码和真值</h3><p>所谓<code>机器码</code>是指，整数在计算机中二进制形式。规则很简单，机器码的最高位（左第一位）表示数字的正负，0表示正数，1表示负数，其余位按照进制转换的规则表示具体数字。</p>
+<p>所谓<code>真值</code>是指，机器码按照上述转换规则还原的带有正负的实际整数。</p>
+<p>举例而言，用8-bits表示一个整数，则十进制的整数<code>+6</code>可表示为：<code>00000110</code>；十进制的数字<code>-5</code>可表示为<code>10000101</code>。这里说的<code>+6</code>和<code>-5</code>便是<code>真值</code>，而表示它们的二进制数便是<code>机器码</code>。再次注意，最高位只用于表示正负，比如<code>10000101</code>的真值是<code>-5</code>而非<code>133</code>，以及我们关于机器码和真值的讨论是基于整数范围的，浮点数在计算机中的存储方式与整数有很大差值，将另作讨论。</p>
+<p>有了机器码，我们便可以在计算机中使用机器码存储和计算真值，那么机器码在计算机中是如何计算的呢？</p>
+<h3 id="原码、反码、补码">原码、反码、补码</h3><p>机器码分为多种，主要包括<code>原码</code>、<code>反码</code>、<code>补码</code>、<code>移码</code>等，今天我们主要总结一下前三个，而<code>移码</code>非常简单，且多用于比较，不做详细说明。另外需要补充一点，我们在此区分机器码的这么多种形式，主要是针对的有符号数，而无符号数，不需要使用最高位来表示正负，也就不需要这么多种编码方式。</p>
+<h5 id="原码：">原码：</h5><p>最高位表示正负，其它位表示真值的绝对值。其中，最高位为<code>0</code>表示正数或者0，为<code>1</code>表示负数。</p>
+<p>比如，同样以8bits长度的数串表示<code>+7</code>的原码为<code>0000 0111</code>，<code>-7</code>的原码为<code>10000111</code>。以后，我们会这样表示：<br><figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">[+7]</span> = <span class="string">[00000111]</span>原</span><br><span class="line"><span class="string">[-7]</span> = <span class="string">[10000111]</span>原</span><br></pre></td></tr></table></figure></p>
+<p>很明显，8-bits的原码能记录的范围为：[-127,+127].</p>
+<p>原码的好处在于，易于理解，相对直观，方便人脑识别和计算。</p>
+<p>对于原码，人脑使用，可以直接计算出其真值然后可以进行后续操作。<strong>但对于计算机，首先，因为最高位用于表示正负，所以不能直接参与运算，需要识别然后做特殊处理；其次，具体计算使用绝对值进行操作，所以两个操作数正负的异同会影响操作符，比如两个异号相加实际要做减法操作，甚至异号相减还需要判断绝对值大小然后决定结果正负。如此，我们计算机的运算器设计将会变得异常复杂。下面，我们将了解如何使用反码和补码将符号位参与运算，从而使加减法统一简单高效地处理，这也是反码和补码出现的原因。</strong></p>
+<h5 id="反码：">反码：</h5><p>正数的反码等于其原码，而负数的反码则是对其原码进行<code>符号位不变，其它位逐一取反</code>的结果。</p>
+<p>比如，同样以8-bits长度的数串表示<code>+7</code>，那么有如下：<br><figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">[+7]</span> = <span class="string">[00000111]</span>原 = <span class="string">[00000111]</span>反</span><br><span class="line"><span class="string">[-7]</span> = <span class="string">[10000111]</span>原 = <span class="string">[11111000]</span>反</span><br></pre></td></tr></table></figure></p>
+<p>同样，8-bits的反码能记录的范围为：[-127,+127]。</p>
+<p>在按位取反之后，我们可以有下面的操作：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2</span> - <span class="number">3</span> = <span class="number">2</span> + (-<span class="number">3</span>) </span><br><span class="line">      = [<span class="number">00000010</span>]原 + [<span class="number">10000011</span>]原 </span><br><span class="line">      = [<span class="number">00000010</span>]反 + [<span class="number">11111100</span>]反 </span><br><span class="line">      = [<span class="number">11111110</span>]反 = [<span class="number">10000001</span>]原 </span><br><span class="line">      = -<span class="number">1</span></span><br></pre></td></tr></table></figure></p>
+<p>上面，我们将减法通过反码转化为了加法，如此，我们的运算将会简单很多，但是反码的方式同样存在一些问题：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">3</span> - <span class="number">3</span> = <span class="number">3</span> + (-<span class="number">3</span>) </span><br><span class="line">      = [<span class="number">00000011</span>]原 + [<span class="number">10000011</span>]原 </span><br><span class="line">      = [<span class="number">00000011</span>]反 + [<span class="number">11111100</span>]反 </span><br><span class="line">      = [<span class="number">11111111</span>]反 </span><br><span class="line">      = [<span class="number">10000000</span>]原 </span><br><span class="line">      = -<span class="number">0</span></span><br></pre></td></tr></table></figure></p>
+<p>出现了<code>-0</code>，这个值是没有意义的。另外，<strong>按照反码加法法则，如果最高位有进位，需要在最低位上<code>+1</code></strong>，那么会出现：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">3</span> - <span class="number">2</span> = <span class="number">3</span> + (-<span class="number">2</span>) </span><br><span class="line">      = [<span class="number">00000011</span>]原 + [<span class="number">10000010</span>]原 </span><br><span class="line">      = [<span class="number">00000011</span>]反 + [<span class="number">11111101</span>]反 (这里最高位有进位，需要在最低位+<span class="number">1</span>) </span><br><span class="line">      = [<span class="number">00000001</span>]反 </span><br><span class="line">      = [<span class="number">00000001</span>]原 = <span class="number">1</span></span><br></pre></td></tr></table></figure></p>
+<p>这种情况，又增加了反码运算的复杂性，影响效率，为解决上面的问题，出现了补码。</p>
+<h5 id="补码：">补码：</h5><p>正数的反码等于其原码，而负数的补码则是对其反码进行<code>末位加1</code>的结果。</p>
+<p>比如，再同样以8-bits长度的数串表示<code>+7</code>，那么有如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[+<span class="number">7</span>] = [<span class="number">00000111</span>]原 = [<span class="number">00000111</span>]反 = [<span class="number">00000111</span>]补</span><br><span class="line">[-<span class="number">7</span>] = [<span class="number">10000111</span>]原 = [<span class="number">11111000</span>]反 = [<span class="number">11111001</span>]补</span><br></pre></td></tr></table></figure></p>
+<p>使用补码，继续做之前的操作：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2</span> - <span class="number">3</span> = <span class="number">2</span> + (-<span class="number">3</span>) </span><br><span class="line">      = [<span class="number">00000010</span>]原 + [<span class="number">10000011</span>]原 </span><br><span class="line">      = [<span class="number">00000010</span>]反 + [<span class="number">11111100</span>]反 </span><br><span class="line">      = [<span class="number">00000010</span>]补 + [<span class="number">11111101</span>]补 </span><br><span class="line">      = [<span class="number">11111111</span>]补 </span><br><span class="line">      = [<span class="number">11111110</span>]反 </span><br><span class="line">      = [<span class="number">10000001</span>]原 </span><br><span class="line">      = -<span class="number">1</span></span><br></pre></td></tr></table></figure></p>
+<p>那么，如果是<code>3-3</code>呢？<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">3</span> - <span class="number">3</span> = <span class="number">3</span> + (-<span class="number">3</span>) </span><br><span class="line">      = [<span class="number">00000011</span>]原 + [<span class="number">10000011</span>]原 </span><br><span class="line">      = [<span class="number">00000011</span>]反 + [<span class="number">11111100</span>]反 </span><br><span class="line">      = [<span class="number">00000011</span>]补 + [<span class="number">11111101</span>]补 </span><br><span class="line">      = [<span class="number">00000000</span>]补 </span><br><span class="line">      = [<span class="number">00000000</span>]原 </span><br><span class="line">      = <span class="number">0</span></span><br></pre></td></tr></table></figure></p>
+<p>是否还需要做额外的加法操作？<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">3</span> - <span class="number">2</span> = <span class="number">3</span> + (-<span class="number">2</span>) </span><br><span class="line">      = [<span class="number">00000011</span>]原 + [<span class="number">10000010</span>]原 </span><br><span class="line">      = [<span class="number">00000011</span>]反 + [<span class="number">11111101</span>]反 </span><br><span class="line">      = [<span class="number">00000011</span>]补 + [<span class="number">11111110</span>]补 </span><br><span class="line">      = [<span class="number">00000001</span>]补 </span><br><span class="line">      = [<span class="number">00000001</span>]原 </span><br><span class="line">      = <span class="number">1</span></span><br></pre></td></tr></table></figure></p>
+<p>这样，我们便可以完美的将减法统一到加法之上，而且不需要繁琐的正负判断，进位控制，甚至可以节约一个位置。那么，这个位置，也就是<code>10000000</code>如何处理呢？按照规定，<code>10000000</code>用来表示<code>-128</code>，正数的补码/反码/原码相同，而负数的补码只是占用了<code>-0</code>的<code>[10000000]原</code>和<code>[11111111]反</code>转换后得到的<code>[10000000]补</code>表示<code>-128</code>，但是这个只是帮助理解，不能反向回推得到<code>-128</code>的原码和补码。</p>
+<p>所以，8bits的补码能记录的范围为：[-128,+127]。</p>
+<p>至此，我们已经了解了，计算机中主要使用的存储和计算整数的方式，鉴于现代计算机主要使用补码方式，自然能很容易理解各种数字类型的表示范围，比如32bits的int范围为：[-2<sup>31</sup>,2<sup>31</sup>-1]。这对于我们后面理解一些JavaScript中的极端情况至关重要。</p>
+<h5 id="稍加补充：">稍加补充：</h5><p>我们可能会想，原码很容易接受的，可是反码和补码的出现是基于什么样的逻辑或者数学原理呢？这里，我们可以蜻蜓点水地讨论一下，因为这个tread已经超出今天话题有点多了。</p>
+<p>常用来说明这个原理的例子是时钟，时钟的一周有12个数字，那么，如果我们希望从<code>3</code>调整到<code>8</code>该如何操作？可以<code>往前+5</code>，也可以<code>往后-7</code>。这里的两个数字，<code>+5</code>和<code>-7</code>存在着的关系：它们同时对数字12求余数得到同样的结果。严格的概念是我们小时候学习的<code>同余</code>，准确的描述上面的关系是<code>+5</code>和<code>-7</code>对<code>模12</code>同余，<code>+5</code>和<code>-7</code>是互补关系，互为<code>补码</code>。我们可以看出，在<code>模</code>的数字范围之内，我们减去一个数字，恰好等于加上这个数字的补码然后取余。大致就这么描述一下，详细的过程是需要严谨的科学证明，网上有大量的文献，在此我们适时收住点到为止，有兴趣的同学自行google吧。</p>
+<h3 id="IEEE_754标准">IEEE 754标准</h3><p>作为一个JavaScript程序员，我们只有一个<code>Number</code>，所以我们从一开始就习惯了：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> num1 = <span class="number">123</span>;</span><br><span class="line"><span class="keyword">var</span> num2 = <span class="number">1.23</span>;</span><br></pre></td></tr></table></figure></p>
+<p>但是，你知道JS的number是<a href="http://zh.wikipedia.org/wiki/IEEE_754" target="_blank" rel="external">IEEE 754标准</a>的64-bits的双精度数值吗？这是一个什么样的标准？使用这个标准的64-bits双精度意味着什么？所以，要掌握JavaScript中的数字，我们首先得了解<code>IEEE 754标准</code>。下面，我将尝试说明一下这个标准，为我们最后学习JavaScript中的数字做铺垫。</p>
+<h5 id="标准的基本原理：">标准的基本原理：</h5><p>我们知道，对于计算机而言，数字没有小数和整数的差别，也就是计算机中没有<code>小数点</code>的存在。通过前文的讨论，我们已经找到了很完美的整数存储计算的方案，但是当涉及到小数，我们很容易发现，现有的方案无法解决我们的需求。然后，计算机科学家们便尝试了多种方案，主要便是<code>定点数</code>和<code>浮点数</code>两种。</p>
+<p>所谓定点数，是指小数点位置固定在数串中间的某个特定位置，点两侧分别为数字的整数和小数部分。比如用8-bits字长的数串，小数点固定在正中间位置，那么<code>11001001</code>和<code>00110101</code>分别表示1100.1001和11.0101两个数字。这种方案简单直观易理解，但是存在严重的空间浪费，以及容易溢出的问题。</p>
+<p>所谓浮点数，是指小数点的位置是不固定的，通过科学计数法(这个应该不需要解释吧)的方式控制小数点的位置，表示不同的数字。这个表示方案便是<code>IEEE 754标准</code>使用的方案。<code>IEEE 754标准</code>是目前使用最广泛的浮点数运算标准。下面我们将主要讨论一下此方案。</p>
+<p>现在，让我们想一下小时候学习的科学计数法，比如<code>-123.456</code>这个数字，转换成科学计数法应该是：<code>-1.23456 × 10^2</code>。这里面已经包含了<code>IEEE 754标准</code>的主要元素。我们梳理一下：第一个，自然是正负号的问题，需要一个标志；然后，需要一个具体的数字，表示有效数字或者精度，如上例的<code>1.23456</code>；再然后，需要一个控制小数点位置的数字，如上例的<code>10^2</code>，回忆一下，我们学习科学计数法的时候，要求前面的数字的绝对值大于1而小于10，也就是小于<code>10^2</code>中的<code>底数(Base)</code>，进制固定之后，底数应该是固定的，所以这里起决定作用的是指数，也就是上例中的<code>2</code>。那么，有了这三个元素，我们便可以很轻松的表示出一个数字，并且灵活的调节小数点位置从而控制数字正负、精度和大小。</p>
+<p>上面的要素，转换成标准语言描述，我们称表示正负的标志叫<code>符号(Sign)</code>，表示精度的数字为<code>尾数(Mantissa)</code>或者<code>有效数字(Significand)</code>，而控制小数点位置的指数就叫<code>指数(Exponent)</code>，指数和<code>基数(Base)</code>共同作用参与计算。下图取自wikipedia，我们直观地感受下这三个要素在一个数串中的相对关系（fraction区域即等同于前面说的有效数字区域）：</p>
+<img src="http://sxxz.u.qiniudn.com/jiqima-javascript-1.png" class="center">
+<p>了解最基本的原理后，我们来大致看一下<code>IEEE 754标准</code>做了什么。</p>
+<p>首先做的事情就是规定这三个要素在一个数串中占有的位数，试想一下，如果各个实现的位数不确定，那么我们是不是很难正确的还原出原始数字？<code>IEEE 754标准</code>规定了四种表示浮点数值的方式：单精确度（32位）、双精确度（64位）、延伸单精确度（43比特以上，很少使用）与延伸双精确度（79比特以上，通常以80比特实做）。只有32位模式有强制要求，其他都是选择性的。而现在主流的语言，多提供了单精度和双精度的实现，我们在此主要比较一下这两者，如图是它们各个部分对应上图，所使用的位数如下：</p>
+<img src="http://sxxz.u.qiniudn.com/jiqima-javascript-3.jpg" class="center">
+<p>补充一点的是，无论是科学计数法还是标准的规定，都要求有效数字（不考虑符号位）必须<code>&gt;=1</code> &amp;&amp; <code>&lt;Base</code>。所以，有效数字其实是一个定点数，小数点的位置固定在有效数字域的最高位和次高位之间。那么，按照上述规定，在二进制中，最高位只能是<code>1</code>，所以标准要求省略其最高位，于是精度提高一位。比如，32-bits的单精度有效数字区域只有23位，但是精度却是24位；64-bits的双精度，拥有52位的有效数字域却是54位精度的。</p>
+<p>然后，还有一个问题，如果按照先有的约定，是不是无法表示小于1的实数？因为，指数一定<code>&gt;=0</code>，有效数字一定<code>&gt;1</code>。于是，<code>IEEE 754标准</code>提出了一个很重要的<code>指数偏移值</code>。它是说明指数域(Exponent占用的区域)的编码值为指数的实际值加上某个固定的值，换言之便是，如果我们根据指数域计算出的指数是N，那么参与计算实际浮点数的指数应该是<code>N-指数偏移值</code>。根据IEEE 754标准的规定，该固定值为<code>2^(e-1) - 1</code>，其中的<code>e</code>为存储指数的比特的长度。比如，从上图中我们看到，32-bits的单精度是以8-bits表示一个指数域，那么偏移值应该是<code>2^(8-1) - 1 = 128−1 = 127</code>。所以，容易得出，单精度浮点数的指数部分实际取值是[-127,128]。比如，某个32-bits单精度的指数为十进制的<code>1</code>，那么指数域的编码应该是<code>10000001</code>，某个32-bits单精度的指数域编码是<code>00000001</code>，那么该指数的实际值应该是十进制的<code>-126</code>。这样，我们就能通过<code>偏移值</code>将正指数转换为负指数，从而使浮点数能逼近<code>0</code>。浮点数的指数计算跟前面讨论的机器码恰好相反，正数的最高位都是<code>1</code>，而负数的最高位都是<code>0</code>。</p>
+<p>以上的描述，便是<code>IEEE 754标准</code>最需要我们了解的原理部分，但是，作为一个广泛使用的工业标准，规定这些还是远远不够的。</p>
+<h5 id="稍加补充：-1">稍加补充：</h5><p>wikipedia对<code>IEEE 754标准</code>有如下描述：</p>
+<blockquote>
+<p>这个标准定义了表示浮点数的格式（包括负零-0）与反常值（denormal number）），一些特殊数值（无穷（Inf）与非数值（NaN）），以及这些数值的“浮点数运算符”；它也指明了四种数值舍入规则和五种例外状况（包括例外发生的时机与处理方式）。</p>
+</blockquote>
+<p>下面，补充几个，我认为与本文后续讨论相关的或者可以帮助大家理解极端现象的定义：</p>
+<p><code>规约形式的浮点数</code>:如果浮点数中指数部分的编码值在<code>0 &lt; exponent &lt; 2^(e-1)</code>之间，且尾数部分最高有效位（即整数字）是1，那么这个浮点数将被称为规约形式的浮点数。也就是，严格按照我们上文描述编码的数字。</p>
+<p><code>非规约形式的浮点数</code>:如果浮点数的指数部分的编码值是0，尾数为非零，那么这个浮点数将被称为非规约形式的浮点数。IEEE 754标准规定：<strong>非规约形式的浮点数的指数偏移值比规约形式的浮点数的指数偏移值大1</strong>.例如，最小的规约形式的单精度浮点数的指数部分编码值为1，指数的实际值为-126；而非规约的单精度浮点数的指数域编码值为0，对应的指数实际值也是-126而不是-127。实际上非规约形式的浮点数仍然是有效可以使用的，只是它们的绝对值已经小于所有的规约浮点数的绝对值；即所有的非规约浮点数比规约浮点数更接近0。规约浮点数的尾数大于等于1且小于2，而非规约浮点数的尾数小于1且大于0.</p>
+<p>上面的两个概念，几乎是直接从wikipedia上扒下来的，<code>非规约形式的浮点数</code>出现的意义是避免<code>突然式下溢出（abrupt underflow）</code>，而采用<code>渐进式下溢出</code>。这已经是上世纪70年代的事情了，差不多是我的年龄的两倍了。这个是一些非常极端的情况，在此我尝试最简单地描述一下<code>非规约形式的浮点数</code>出现的意义，知道有这么回事便可：下面，以单精度为例，如果没有<code>非规约形式的浮点数</code>，那么绝对值最小的两个相邻的浮点数之间的差值将是绝对值最小的浮点数的<code>2^23</code>分之一，大家想一下，绝对值次小的浮点数减去绝对值最小的浮点数的值是多少？<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.00</span>..<span class="number">.01</span> × <span class="number">2</span>^(-<span class="number">126</span>) - <span class="number">1.00</span>..<span class="number">.00</span> × <span class="number">2</span>^(-<span class="number">126</span>) = <span class="number">0.00</span>.<span class="number">.01</span> × <span class="number">2</span>^(-<span class="number">126</span>) </span><br><span class="line">                                              = <span class="number">1</span> × <span class="number">2</span>^(-<span class="number">126</span>-<span class="number">23</span>)</span><br><span class="line">                                              = <span class="number">2</span>^(-<span class="number">149</span>)</span><br></pre></td></tr></table></figure></p>
+<p>很明显，绝对值最小的规约数无法表达其和次小的规约数的差值，所以很容易导致有若干数字之间的差值下溢，可能会触发意料之外的后果。而如果采用<code>非规约形式的浮点数</code>，<strong>指数全0，偏移值比规约数偏移值大1（-126比-127大1），尾数小于1</strong>，那么非规约数能表达的最小值便是：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0.00</span>.<span class="number">.01</span> × <span class="number">2</span>^(-<span class="number">126</span>) = <span class="number">1</span> × <span class="number">2</span>^(-<span class="number">126</span>-<span class="number">23</span>)</span><br><span class="line">                    = <span class="number">2</span>^(-<span class="number">149</span>)</span><br></pre></td></tr></table></figure></p>
+<p>所以，<code>非规约形式的浮点数</code>解决了前述的<code>突然式下溢出（abrupt underflow）</code>而被标准采纳。</p>
+<p><code>IEEE 754标准</code>还规定了三个特殊值：</p>
+<ol>
+<li>指数全0且尾数小数部分全0，则这个数字为±0。（符号位决定正负）</li>
+<li>指数为2^e - 1且尾数的小数部分全0，这个数字是±∞。（符号位决定正负）</li>
+<li>指数为2^e - 1且尾数的小数部分非0，这个数字是NaN。</li>
+</ol>
+<p>结合前面的规约数，非规约数以及三个特殊值，可以得到如下总结：</p>
+<img src="http://sxxz.u.qiniudn.com/jiqima-javascript-5.png" class="center">
+<p>现在，让我们回忆一下，各种语言中普遍描述的双精度浮点数的范围：[-1.7 × 10^(-308),1.7 × 10^308]。打个岔，想象一个有300多位的十进制数字的适用情形，私以为远超过普通人想象力的边界。这个范围为什么是这个范围呢？我觉得，通过上面的讨论，大家应该能清晰，1.7/308这些数字出现的必然原因。</p>
+<p>首先，我们应该很容易根据偏移量得出双精度浮点数的计算公式：</p>
+<img src="http://sxxz.u.qiniudn.com/jiqima-javascript-4.png" class="center">
+<p>然后，以正数为例，按照上述<code>特殊值</code>中<code>±∞</code>和<code>NaN</code>的约定，指数的最大值应该满足指数取规约数的指数范围的最大值，然后小数部分取小数部分的最大值，可以得出这个二进制的数字应该是：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0</span> <span class="number">11111111110</span> <span class="number">11.</span><span class="number">.11</span>(<span class="number">52</span>个)</span><br></pre></td></tr></table></figure></p>
+<p>转换为16进制表示：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0x7fef</span> ffff ffff ffff</span><br></pre></td></tr></table></figure></p>
+<p>那么，根据前述规约数的原理，反编码便得到十进制的：<code>1.7976931348623157 x 10^308</code>。类似的道理，<code>Sign</code>位取反，便是范围的下限。</p>
+<p>到此为止吧，我对<code>IEEE 754标准</code>也是最近几天稍加学习，再说多了就误导大家了。通过这几天的学习，我感觉，我们在理解的<code>IEEE 754标准</code>及浮点数的时候，要特别注意将精度和范围两个概念分别开来。范围只是一个模糊的界限，精度才是能准确表达的数字。</p>
+<h3 id="回到JavaScript">回到JavaScript</h3><p>在上面的讨论中，我们很少提及JavaScript，似乎有点背离今天的主题了，但是，在了解了前述的原理之后，我们对JavaScript中数字的把握将”水到渠成”。这终将是一次，铺垫多于正文，开胃菜多于正餐的讨论。嗯，快喊小伙伴，正餐开始了！</p>
+<h5 id="ES的”The_Number_Type”：">ES的”The Number Type”：</h5><p>现在，我们打开ES规范的<a href="http://es5.github.io/#x8.5" target="_blank" rel="external">“The Number Type”</a>是不是基本通读下来了？<br>比如：</p>
+<blockquote>
+<p>The Number type has exactly 18437736874454810627 (that is, 2^64 − 2^53 + 3) values…</p>
+</blockquote>
+<p>为什么是这个数字？因为，我们说JavaScript中的数字是64-bits的双精度，所以首先有<code>2^64</code>中可能的组合，然后，按照前述的<code>IEEE 754标准</code>的标准中的<code>特殊值</code>中的部分，<code>NaN</code>和<code>±∞</code>占用了<code>2^53</code>个数值，但是表示了三个直观的量，所以，加减一下，自然就是<code>18437736874454810627 (that is, 2^64 − 2^53 + 3) values</code>。</p>
+<blockquote>
+<p>…the 9007199254740990 (that is, 2^53−2) distinct “Not-a-Number” values…</p>
+</blockquote>
+<p>为什么这么多<code>NaN</code>？同样，按照前述的<code>IEEE 754标准</code>的标准中的<code>特殊值</code>中的部分，<code>NaN</code>使用了<code>Significand</code>非零、指数是特定<code>2^e-1</code>且<code>Sign</code>无要求的所有可能，即<code>2^53</code>减去<code>±∞</code>两种情况。</p>
+<blockquote>
+<p>…e is an integer ranging from −1074 to 971…</p>
+</blockquote>
+<p>为什么指数的范围是这个呢？而不是<code>-1022</code>到<code>+1022</code>呢？因为，ES演化了一下公式，对比一下我们之前演示64-bits的公式，关于参与计算的<code>mantissa</code>，我们按照<code>IEEE 754标准</code>在演示的时候中使用的是<code>1.m</code>，而ES规范中使用的是<code>m</code>，当然会有<code>尾数域</code>bit长度的差异了。</p>
+<p>到这里，关于数字，大概就可以结束了。开篇的几个问题，相信读到这里的同学，都能有答案了。但是，还有一个问题，<code>JavaScript中的数字真的只有一种类型吗？</code>，而且貌似到现在与我们的初衷，理解<code>&gt;&gt;&gt;</code>有点偏离了。不过，世界上很多事情往往都是这样，解释原理需要到口干舌燥，而用原理去解释现象却只需要三言两语。</p>
+<h5 id="JavaScript不是只有64-bits的双精度">JavaScript不是只有64-bits的双精度</h5><p>是的，小标题已经回答了我们的问题，JavaScript不是只有64-bits的双精度。我们通篇都在说JavaScript中数字的各种，一直按照64-bits的双精度来描述，但是，如之前所说，ES中有ToInteger/ToInt32/ToUint32/ToUint16等<code>Type Conversion</code>。这些<code>Type Conversion</code>不是我们直接调用的API，而是语言引擎在进行某些特定操作的时候，替我们做的。这种“隐形的操作”，只有在一些极端的情况下，会表现出来。现在，我们可以到<a href="http://es5.github.io/#x9.5" target="_blank" rel="external">“ToInt32”</a>/<a href="http://es5.github.io/#x9.6" target="_blank" rel="external">“ToUint32”</a>/<a href="http://es5.github.io/#x9.7" target="_blank" rel="external">“ToInt16”</a>三个地方看一下，稍作比较便能发现，他们的差异很小，只是在特定的步骤中存在差异。比如，<code>ToUint32</code>和<code>ToUint16</code><br>的差异仅仅操作的最后一步存在差异，按顺序列出比较一下：</p>
+<blockquote>
+<p>Let int32bit be posInt modulo 2^32; that is, a finite integer value k of Number type with positive sign and less than 2^32 in magnitude such that the mathematical difference of posInt and k is mathematically an integer multiple of 2^32.</p>
+<p>Return int32bit.</p>
+</blockquote>
+<p>vs</p>
+<blockquote>
+<p>Let int16bit be posInt modulo 2^16; that is, a finite integer value k of Number type with positive sign and less than 2^16 in magnitude such that the mathematical difference of posInt and k is mathematically an integer multiple of 2^16.</p>
+<p>Return int16bit.</p>
+</blockquote>
+<p>比较一下，不难发现，仅仅是<code>2^32</code>和<code>2^16</code>的差异，而关键点恰是<code>modulo</code>操作的时候，按照我们之前讨论的原理，很容易理解这个操作决定了可能出现的最大数。这样的比较，有一好处，能提高我们阅读标准的速度，而且加深理解，对掌握标准很有帮助。</p>
+<p>总结一下这三个操作的范围：</p>
+<p><code>ToInt32</code>的范围便是其它强类型语言中的[-2^31, -2^31 - 1]。</p>
+<p><code>ToUint32</code>的范围便是其它强类型语言中的[0, -2^32 - 1]。</p>
+<p><code>ToUint16</code>的范围便是其它强类型语言中的[0, -2^16 - 1]。</p>
+<p>通过搜索，很容易能找到，JavaScript中那些操作中使用了上述相关的操作。其中，<code>ToUint16</code>仅仅在<code>String.fromCharCode</code>中有使用，我们不做讨论了。<code>ToInt32</code>有在多个位运算符中使用，比如<code>~</code> / <code>&lt;&lt;</code> / <code>&gt;&gt;</code>，以及在<code>parseInt</code>也有使用。而<code>ToUint32</code>的使用则出现在了大量的地方，主要分布在，数组相关的操作，位运算的操作两个区域。</p>
+<p>我们就借<code>ToUint32</code>的这些使用，回到开篇讨论的那个地方吧：</p>
+<p>首先，来到这里<a href="http://es5.github.io/#x11.7.3" target="_blank" rel="external"><code>&gt;&gt;&gt;</code></a>，看到操作如下：</p>
+<blockquote>
+<p>1.Let lref be the result of evaluating ShiftExpression.</p>
+<p>2.Let lval be GetValue(lref).</p>
+<p>3.Let rref be the result of evaluating AdditiveExpression.</p>
+<p>4.Let rval be GetValue(rref).</p>
+<p>5.Let lnum be ToUint32(lval).</p>
+<p>6.Let rnum be ToUint32(rval).</p>
+<p>7.Let shiftCount be the result of masking out all but the least significant 5 bits of rnum, that is, compute rnum &amp; 0x1F.<br>Return the result of performing a zero-filling right shift of lnum by shiftCount bits. Vacated bits are filled with zero. The result is an unsigned 32-bit integer.</p>
+</blockquote>
+<p>再看<a href="http://es5.github.io/#x15.4.2.2" target="_blank" rel="external"><code>new Array (len)</code></a>，有一句：</p>
+<blockquote>
+<p>If the argument len is a Number and ToUint32(len) is equal to len, then the length property of the newly constructed object is set to ToUint32(len). If the argument len is a Number and ToUint32(len) is not equal to len, a RangeError exception is thrown.</p>
+</blockquote>
+<p>对比不难发现，<code>&gt;&gt;&gt;</code>的返回值和<code>array.length</code>的取值范围，无差异，经过<code>&gt;&gt;&gt;</code>操作后的数字，一定是一个合法的<code>array.length</code>。解释原理总是那么复杂，可是用原理解释现象总是那么简单。</p>
+<p>以上。</p>
+</div><div id="article-discus"><div id="uyan_frame"></div></div></article></div></div><footer class="base-footer"><div class="footer-wrapper"><span>随心 Using </span><a href="https://github.com/chuguixin/Simple"><span>Simple</span></a><span> Presents For You.</span></div></footer><div class="dom-ready"><script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js" type="text/javascript"></script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a34f1b5ac0025caf0dec6d5dadadeff67";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script src="http://v2.uyan.cc/code/uyan.js?uid=1839078"></script></div></body></html>

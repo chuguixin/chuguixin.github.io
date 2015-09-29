@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Examples</title>
+<meta name="description" content="">
+<meta name="keywords" content="">
+<link href="" rel="stylesheet">
+</head>
+<body>
+
+    <div id="J_mvvmContainer">
+        <input id="J_num1" mvvm-value="{{num1}}">
+        <select id="J_calculate" mvvm-value="{{calculate}}">
+            <option value="plus">+</option>
+            <option value="minus">-</option>
+            <option value="time">*</option>
+            <option value="divide">/</option>
+        </select>
+        <input id="J_num2" mvvm-value="{{num2}}">
+        <span>=</span>
+        <span id="J_result">{{result}}</span>
+    </div>
+    
+    <script type="text/javascript" src="./mvvm.js"></script>
+</body>
+</html>
