@@ -2,7 +2,7 @@
   position: relative;
   margin: 0;
   padding: 40px 0 0 0;
-  text-indent: 120px;
+  text-indent: 100px;
 }
 .archive-main .page-title .time-line-bg .time-line-disc {
   top: 0;
@@ -11,8 +11,8 @@
 .archive-main .main-content .time-title {
   position: relative;
   margin: 0;
-  font-size: 2em;
-  line-height: 1em;
+  font-size: 2rem;
+  line-height: 1rem;
   padding: .6em 0;
 }
 .archive-main .main-content .time-title .time-title-link {
@@ -23,33 +23,36 @@
 }
 .archive-main .main-content .article-achive-title {
   position: relative;
-  font-size: 1.5em;
-  line-height: 1em;
+  font-size: 1.5rem;
+  line-height: 1rem;
   padding: .6em 0;
   margin: 0;
 }
+.archive-main .main-content .article-achive-title:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.archive-main .main-content .article-achive-title .title-date {
+  font-size: .6rem;
+  position: absolute;
+  left: 3rem;
+  width: 8rem;
+}
 .archive-main .main-content .article-achive-title .title-link {
-  margin-left: 120px;
   text-decoration: none;
   font-weight: normal;
-}
-.archive-main .main-content .article-achive-title .title-link .title-date {
-  font-size: .6em;
-  padding-right: 8px;
-  color: #6a6a6a;
-  transition: color .36s ease;
+  float: left;
+  margin-left: 110px;
 }
 .archive-main .main-content .article-achive-title .title-link:hover ~ .time-line-bg .time-line-disc {
   background-color: #3ebb96;
-}
-.archive-main .main-content .article-achive-title .title-link:hover .title-date {
-  color: #3ebb96;
 }
 .archive-main .time-line-bg {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 100px;
+  left: 90px;
   width: 4px;
   background-color: rgba(214, 214, 214, 0.9);
   display: table-cell;

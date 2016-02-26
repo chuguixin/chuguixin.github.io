@@ -1,6 +1,7 @@
 .menu-wrapper {
   position: relative;
   height: 48px;
+  background-color: rgba(242, 242, 242, 0.95);
 }
 .menu-wrapper .menu-layout-bg {
   position: absolute;
@@ -16,7 +17,6 @@
 }
 .menu-wrapper .menu-content {
   height: 48px;
-  background-color: rgba(250, 250, 250, 0.95);
   position: relative;
 }
 .menu-wrapper .menu-list {
