@@ -72,7 +72,7 @@ deploy:
   type: git
   repo: 
     gitcafe: https://gitcafe.com/chuguixin/chuguixin.git,gitcafe-pages
-    # github: https://github.com/chuguixin/chuguixin.github.io.git,master
+    github: https://github.com/chuguixin/chuguixin.github.io.git,master
 
 # baidu tongji
 baidu_tongji_id: a34f1b5ac0025caf0dec6d5dadadeff67
