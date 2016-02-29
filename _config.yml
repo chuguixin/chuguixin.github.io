@@ -75,7 +75,7 @@ deploy:
     github: https://github.com/chuguixin/chuguixin.github.io.git,master
 
 # baidu tongji
-baidu_tongji_id: a34f1b5ac0025caf0dec6d5dadadeff67
+baidu_tongji_id: 34f1b5ac0025caf0dec6d5dadadeff67
 
 # uyan 评论系统
 uyan_id: 1839078
