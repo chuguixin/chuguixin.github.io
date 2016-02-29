@@ -1,0 +1,31 @@
+.category-main {
+  padding: 20px 0 40px;
+}
+.category-main .page-title {
+  position: relative;
+  margin: 0;
+  padding: 20px 0;
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+.category-main .page-title .time-line-bg .time-line-disc {
+  top: 0;
+  display: none;
+}
+.category-main .page-content .category-item {
+  font-size: 18px;
+  border-bottom: 1px dotted #888;
+  margin-bottom: 12px;
+}
+.category-main .page-content .category-item:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.category-main .page-content .category-item .item-title {
+  float: left;
+  text-decoration: none;
+}
+.category-main .page-content .category-item .item-date {
+  float: right;
+}
