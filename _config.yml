@@ -71,8 +71,9 @@ theme: Simple
 deploy:
   type: git
   repo: 
-    gitcafe: https://gitcafe.com/chuguixin/chuguixin.git,gitcafe-pages
+    # gitcafe: https://gitcafe.com/chuguixin/chuguixin.git,gitcafe-pages
     github: https://github.com/chuguixin/chuguixin.github.io.git,master
+    coding: https://git.coding.net/chuguixin/chuguixin.git,coding-pages
 
 # baidu tongji
 baidu_tongji_id: 34f1b5ac0025caf0dec6d5dadadeff67
